@@ -6,6 +6,7 @@ import { getOffering, getOverview } from "@/lib/api";
 import {AiOverview} from '@/components/ai-overview';
 import { SiteHeader } from "@/components/site-header";
 import { TAG_LABELS } from '@easy-a/core';
+import { checkStudentSetup } from "@/lib/profile-access";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params; const { data } = await getOffering(id);
@@ -20,6 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function OfferingPage({ params }: { params: Promise<{ id: string }> }) {
+  await checkStudentSetup();
   const { id } = await params;
   const [{data:offering,demo},overview]=await Promise.all([getOffering(id),getOverview(id)]);
   if (!offering) notFound();

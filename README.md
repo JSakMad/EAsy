@@ -1,5 +1,7 @@
 # EAsy
 
+**Accounts added September 19, 2026:** users can create an account and sign in with Google. See [authentication setup](docs/AUTHENTICATION.md) for the free OAuth integration, migration 007, web server environment settings, and testing. Teammate-facing changes are dated in [the change log](docs/CHANGELOG.md).
+
 For teammate onboarding and the current Vercel + Render + Neon deployment plan, see [Team setup](TEAM_SETUP.md). The older Supabase walkthrough below is an alternative, not the current deployment target.
 
 Professor/course pages now support **on-demand Groq AI overviews with a 30-day cache and sampled-review dates**. Set the server-only `GROQ_API_KEY` in `.env`, remain on Groq's Free plan, and apply migrations. See [AI overview setup](docs/AI_OVERVIEWS.md) for privacy, request budgets, and hosting notes. No Ollama or manual generation is needed for the website.

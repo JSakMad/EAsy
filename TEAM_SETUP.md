@@ -1,5 +1,7 @@
 # Teammate setup
 
+Account support added **2026-09-19**: follow [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) for Google OAuth credentials, web database settings, migration 007, and verification. Frontend-only browsing still works without account configuration. See [docs/CHANGELOG.md](docs/CHANGELOG.md) for dated changes.
+
 Clone or download the entire repository, not just the frontend folder: this is an npm workspace and needs the shared core package, root configuration, and lockfile.
 
 The deployed website is for using EAsy; the GitHub repository is for editing it.
