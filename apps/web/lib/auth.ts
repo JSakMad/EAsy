@@ -12,8 +12,11 @@ export function authOptions(
     baseURL: config.baseURL,
     secret: config.secret,
     database,
-    trustedOrigins: [config.baseURL],
-    emailAndPassword: { enabled: false },
+    trustedOrigins: [
+      config.baseURL,
+      ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+      ...(process.env.VERCEL_PROJECT_PRODUCTION_URL ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`] : []),
+    ],
     socialProviders: {
       google: {
         clientId: config.googleClientId,
