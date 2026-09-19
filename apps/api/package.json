@@ -1,0 +1,41 @@
+{
+  "name": "@easy-a/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "overview:generate": "tsx src/jobs/overviews.ts",
+    "ingest:retag": "tsx src/jobs/retag.ts",
+    "dev": "tsx watch src/server.ts",
+    "prebuild": "npm run build -w @easy-a/core",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "pretest": "npm run build -w @easy-a/core",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts",
+    "ingest": "tsx src/jobs/ingest.ts",
+    "ingest:status": "tsx src/jobs/ingestion-status.ts",
+    "ingest:renormalize": "tsx src/jobs/renormalize.ts",
+    "score": "tsx src/jobs/recompute-scores.ts"
+  },
+  "dependencies": {
+    "@easy-a/core": "*",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "pg": "^8.16.3",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.0",
+    "@types/pg": "^8.15.5",
+    "supertest": "^7.1.4",
+    "@types/supertest": "^6.0.3",
+    "tsx": "^4.20.5"
+  }
+}

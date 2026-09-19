@@ -1,0 +1,27 @@
+{
+  "name": "@easy-a/web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "dev": "next dev",
+    "prebuild": "npm run build -w @easy-a/core",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@easy-a/core": "*",
+    "lucide-react": "^0.542.0",
+    "next": "^16.3.5",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "jsdom": "^30.0.1"
+  }
+}

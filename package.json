@@ -1,0 +1,31 @@
+{
+  "name": "easy-a-finder",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "predev": "npm run build -w @easy-a/core",
+    "dev": "concurrently -n api,web -c yellow,cyan \"npm run dev -w @easy-a/api\" \"npm run dev -w @easy-a/web\"",
+    "build": "npm run build -w @easy-a/core && npm run build -w @easy-a/api && npm run build -w @easy-a/web",
+    "test": "npm run build -w @easy-a/core && npm run test -w @easy-a/core && npm run test -w @easy-a/api && npm run test -w @easy-a/web",
+    "typecheck": "npm run build -w @easy-a/core && npm run typecheck --workspaces --if-present",
+    "db:migrate": "npm run db:migrate -w @easy-a/api",
+    "db:seed": "npm run build -w @easy-a/core && npm run db:seed -w @easy-a/api",
+    "preingest": "npm run build -w @easy-a/core",
+    "ingest": "npm run ingest -w @easy-a/api --",
+    "ingest:status": "npm run ingest:status -w @easy-a/api",
+    "ingest:renormalize": "npm run build -w @easy-a/core && npm run ingest:renormalize -w @easy-a/api --",
+    "db:backup": "node scripts/backup.mjs",
+    "overview:generate": "npm run build -w @easy-a/core && npm run overview:generate -w @easy-a/api --",
+    "overview:status": "npm run overview:generate -w @easy-a/api -- --status",
+    "ai:serve": "OLLAMA_NO_CLOUD=1 OLLAMA_HOST=127.0.0.1:11435 OLLAMA_NUM_PARALLEL=1 ollama serve",
+    "ingest:retag": "npm run build -w @easy-a/core && npm run ingest:retag -w @easy-a/api",
+    "score": "npm run score -w @easy-a/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.2",
+    "vitest": "^5.0.0"
+  },
+  "engines": { "node": ">=20" }
+}

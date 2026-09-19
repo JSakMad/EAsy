@@ -1,0 +1,37 @@
+name: Weekly data refresh
+
+on:
+  schedule:
+    - cron: "17 8 * * 0"
+  workflow_dispatch:
+
+concurrency:
+  group: easy-a-ingestion
+  cancel-in-progress: false
+
+jobs:
+  ingest-and-score:
+    if: vars.RMP_INGESTION_ENABLED == 'true' && vars.RMP_TERMS_REVIEWED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_SSL: "true"
+      RMP_INGESTION_ENABLED: ${{ vars.RMP_INGESTION_ENABLED }}
+      RMP_TERMS_REVIEWED: ${{ vars.RMP_TERMS_REVIEWED }}
+      RMP_REQUEST_DELAY_MS: "5000"
+      RMP_MAX_REQUESTS_PER_RUN: "50"
+      RMP_MAX_REQUESTS_PER_DAY: "200"
+      RMP_MAX_PROFESSORS_PER_RUN: "5"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @easy-a/core
+      - run: npm run db:migrate
+      - run: npm run ingest

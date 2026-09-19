@@ -1,0 +1,222 @@
+{
+  "notecard_allowed": {
+    "label": "Notecard allowed",
+    "patterns": ["\\bnote\\s*card(?:s)?\\b", "\\bcheat sheet(?:s)? allowed\\b", "\\bone (?:page|sheet) of notes\\b"]
+  },
+  "open_book_exam": {
+    "label": "Open book exams",
+    "patterns": ["\\bopen[ -]book\\b", "\\bopen[ -]note(?:s)?\\b"]
+  },
+  "online_exams": {
+    "label": "Online exams",
+    "patterns": ["\\bonline (?:exam|test)(?:s)?\\b", "\\bexam(?:s)? were online\\b", "\\btook the (?:exam|test) on canvas\\b"]
+  },
+  "no_cumulative_final": {
+    "label": "No cumulative final",
+    "patterns": ["\\bno (?:cumulative |comprehensive )?final\\b", "\\bfinal (?:was not|wasn't|is not|isn't) cumulative\\b"]
+  },
+  "curve_applied": {
+    "label": "Curve applied",
+    "patterns": ["\\bcurv(?:e|ed|es|ing) (?:the )?(?:exam|test|grade|class|scores?)?\\b", "\\bthere was a curve\\b"]
+  },
+  "attendance_not_required": {
+    "label": "Attendance optional",
+    "patterns": ["\\b(?:did not|didn't|does not|doesn't) take attendance\\b", "\\battendance (?:was |is )?(?:optional|not required|not mandatory)\\b"]
+  },
+  "easy_a_explicit_mention": {
+    "label": "Easy A mentioned",
+    "patterns": ["\\beasy a\\b", "\\bfree a\\b", "\\beasiest class (?:i have|i've) taken\\b"]
+  },
+  "group_project_heavy": {
+    "label": "Group-project heavy",
+    "patterns": ["\\bmostly group project(?:s)?\\b", "\\bgroup[ -]based grading\\b", "\\bgrade (?:was |is )?mostly group work\\b"]
+  },
+  "online_quizzes": {
+    "label": "Online quizzes",
+    "patterns": [
+      "\\bonline quizzes\\b",
+      "\\bquizzes on Canvas\\b",
+      "\\btook the quiz at home\\b",
+      "\\bonline quiz(?:zes)?\\b",
+      "\\bquiz(?:zes)? (?:are |were )?on canvas\\b"
+    ]
+  },
+  "unlimited_quiz_attempts": {
+    "label": "Quiz retakes allowed",
+    "patterns": [
+      "\\bunlimited attempts\\b",
+      "\\bcan retake the quiz\\b",
+      "\\bhighest score counts\\b",
+      "\\bunlimited (?:quiz |test )?attempts\\b",
+      "\\b(?:can |allowed to )?retake (?:the |your )?quizzes\\b"
+    ]
+  },
+  "take_home_exam": {
+    "label": "Take-home exam",
+    "patterns": [
+      "\\btake[ -]home exam\\b",
+      "\\btake the test home\\b",
+      "\\bexam was take[ -]home\\b",
+      "\\btake[ -]home (?:exam|test)s?\\b"
+    ]
+  },
+  "unproctored_exam": {
+    "label": "Unproctored exam",
+    "patterns": [
+      "\\bunproctored\\b",
+      "\\bno proctoring\\b",
+      "\\bdidn't watch us during the test\\b"
+    ]
+  },
+  "multiple_choice_only": {
+    "label": "Multiple choice only",
+    "patterns": [
+      "\\ball multiple choice\\b",
+      "\\bno free response\\b",
+      "\\bjust Scantron\\b",
+      "\\b(?:all|only|entirely) multiple[ -]choice\\b"
+    ]
+  },
+  "predictable_exam_format": {
+    "label": "Predictable exam format",
+    "patterns": [
+      "\\bexam is basically the homework\\b",
+      "\\btest mirrors the practice problems\\b",
+      "\\bexam felt exactly like the study guide\\b"
+    ]
+  },
+  "exam_reuses_old_questions": {
+    "label": "Reuses exam questions",
+    "patterns": [
+      "\\buses questions from old exams\\b",
+      "\\brecycled test questions\\b"
+    ]
+  },
+  "provides_study_guide": {
+    "label": "Study guide provided",
+    "patterns": [
+      "\\bgives a study guide\\b",
+      "\\bstudy guide covers everything on the test\\b",
+      "\\bstudy guide is basically the exam\\b",
+      "\\b(?:gives?|provides?|posts?) (?:you )?(?:a |the )?study guides?\\b"
+    ]
+  },
+  "posts_slides_or_notes": {
+    "label": "Slides or notes posted",
+    "patterns": [
+      "\\bposts the slides\\b",
+      "\\bnotes are online\\b",
+      "\\buploads lecture notes\\b",
+      "\\b(?:posts?|uploads?) (?:the |lecture )?(?:slides|notes)\\b"
+    ]
+  },
+  "practice_exam_provided": {
+    "label": "Practice exam provided",
+    "patterns": [
+      "\\bpractice exam\\b",
+      "\\bgives you a practice test\\b",
+      "\\bpractice (?:exam|test)s?\\b"
+    ]
+  },
+  "review_session_before_exam": {
+    "label": "Exam review session",
+    "patterns": [
+      "\\breview session\\b",
+      "\\bgoes over what's on the test beforehand\\b"
+    ]
+  },
+  "allows_past_exams": {
+    "label": "Past exams available",
+    "patterns": [
+      "\\blets you use old exams to study\\b",
+      "\\bold tests are basically the same\\b"
+    ]
+  },
+  "drops_lowest_score": {
+    "label": "Lowest scores dropped",
+    "patterns": [
+      "\\bdrops your lowest quiz\\b",
+      "\\bdrops the lowest homework grade\\b",
+      "\\bdrops two exams\\b",
+      "\\bdrops? (?:your |the )?(?:lowest|worst) (?:quiz|exam|test|homework|assignment)(?: score| grade)?\\b",
+      "\\bdrops? (?:one|two|three|[1-3]) (?:exams|tests|quizzes|assignments)\\b"
+    ]
+  },
+  "extra_credit_offered": {
+    "label": "Extra credit offered",
+    "patterns": [
+      "\\bextra credit\\b",
+      "\\bbonus points available\\b"
+    ]
+  },
+  "generous_curve": {
+    "label": "Generous curve reported",
+    "patterns": [
+      "\\bcurves generously\\b",
+      "\\beveryone gets bumped up\\b",
+      "\\bcurve saved my grade\\b"
+    ]
+  },
+  "participation_based_grading": {
+    "label": "Participation points",
+    "patterns": [
+      "\\beasy points for participation\\b",
+      "\\bgraded just for showing up\\b"
+    ]
+  },
+  "effort_based_grading": {
+    "label": "Completion-based grading",
+    "patterns": [
+      "\\bgraded on completion, not correctness\\b",
+      "\\bfull credit for trying\\b"
+    ]
+  },
+  "no_late_penalty": {
+    "label": "No late penalty",
+    "patterns": [
+      "\\bno penalty for late work\\b",
+      "\\blate submissions accepted with no deduction\\b",
+      "\\bno late (?:penalty|penalties)\\b"
+    ]
+  },
+  "light_homework_load": {
+    "label": "Light homework load",
+    "patterns": [
+      "\\bbarely any homework\\b",
+      "\\bhomework takes 10 minutes\\b",
+      "\\b(?:very little|light|barely any) homework\\b"
+    ]
+  },
+  "no_homework": {
+    "label": "No homework",
+    "patterns": [
+      "\\bno homework at all\\b",
+      "\\bno homework\\b"
+    ]
+  },
+  "flexible_deadlines": {
+    "label": "Flexible deadlines",
+    "patterns": [
+      "\\bflexible due dates\\b",
+      "\\bself[ -]paced\\b",
+      "\\bflexible (?:deadlines|due dates)\\b"
+    ]
+  },
+  "few_graded_assignments": {
+    "label": "Few graded assignments",
+    "patterns": [
+      "\\bonly 3 grades all semester\\b",
+      "\\bgrade is just two exams\\b",
+      "\\bonly (?:two|three|[23]) grades (?:all|the whole) semester\\b"
+    ]
+  },
+  "gpa_booster_mention": {
+    "label": "GPA booster mentioned",
+    "patterns": [
+      "\\bGPA booster\\b",
+      "\\bjoke class\\b",
+      "\\bblow[ -]off class\\b",
+      "\\btook it for an easy grade\\b"
+    ]
+  }
+}

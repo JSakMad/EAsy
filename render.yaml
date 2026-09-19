@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: easy-a-finder-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build -w @easy-a/core && npm run build -w @easy-a/api
+    startCommand: node apps/api/dist/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: "true"
+      - key: WEB_ORIGIN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ADMIN_API_KEY
+        generateValue: true
+      - key: RMP_INGESTION_ENABLED
+        value: "false"
+      - key: RMP_TERMS_REVIEWED
+        value: "false"
