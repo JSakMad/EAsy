@@ -39,7 +39,7 @@ export function BrowseExperience({courses,demo,initialCode}:{courses:Course[];de
         let data:Offering[];
         if(demo) data=demoOfferings.filter(o=>o.courseCode===selected!.courseCode);
         else {
-          const response=await fetch(`${process.env.NEXT_PUBLIC_API_URL??'http://localhost:4000'}/courses/${encodeURIComponent(selected!.courseCode)}/offerings`,{signal:controller.signal});
+          const response=await fetch(`/api/courses/${encodeURIComponent(selected!.courseCode)}/offerings`,{signal:controller.signal,cache:'no-store'});
           if(!response.ok) throw new Error('Course comparison unavailable.');
           data=(await response.json()).data;
         }

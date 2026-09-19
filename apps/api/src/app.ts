@@ -10,9 +10,10 @@ import {getCloudOverview,ensureCloudOverview} from './overview/cloud-service.js'
 
 export function createApp(repository: Repository = defaultRepository,overviewReader:(id:string)=>Promise<unknown>=getCloudOverview,overviewGenerator=ensureCloudOverview) {
   const app = express();
+  const webOrigins = config.WEB_ORIGIN.split(",").map(origin => origin.trim().replace(/\/+$/, ""));
   app.disable("x-powered-by");
   app.use(helmet());
-  app.use(cors({ origin: config.WEB_ORIGIN.split(",").map((origin) => origin.trim()) }));
+  app.use(cors({ origin: webOrigins }));
   app.use(express.json({ limit: "64kb" }));
 
   app.get("/health", (_req, res) => res.json({ ok: true, service: "easy-a-api" }));
@@ -65,7 +66,7 @@ export function createApp(repository: Repository = defaultRepository,overviewRea
   app.post('/offerings/:id/overview/generate',async(req,res)=>{
     res.set('Cache-Control','no-store');
     const origin=req.header('origin');
-    if(origin&&!config.WEB_ORIGIN.split(',').map(s=>s.trim()).includes(origin))return res.status(403).json({error:'Origin not allowed'});
+    if(origin&&!webOrigins.includes(origin))return res.status(403).json({error:'Origin not allowed'});
     if(!req.is('application/json')||Object.keys(req.body??{}).length)return res.status(400).json({error:'Send an empty JSON object; evidence is selected by the server.'});
     try {
       const data=await overviewGenerator(req.params.id!);

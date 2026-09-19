@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import { createApp } from "../src/app.js";
 import type { Repository } from "../src/repository.js";
+import { config } from "../src/config.js";
 
 const fakeRepository: Repository = {
   courses:async()=>[{courseCode:'CS 1530',courseTitle:null,professorCount:2,reviewCount:23,rawCommentText:'PRIVATE_MARKER'}],
@@ -15,6 +16,26 @@ const fakeRepository: Repository = {
 };
 
 describe("API", () => {
+  it('accepts configured web origins with trailing slashes without allowing other origins', async () => {
+    const previous = config.WEB_ORIGIN;
+    try {
+      config.WEB_ORIGIN = ' http://localhost:3000/ , https://easy.example/ ';
+      const generator = vi.fn().mockResolvedValue({ status: 'pending' });
+      const app = createApp(fakeRepository, undefined, generator);
+      for (const origin of ['http://localhost:3000', 'https://easy.example']) {
+        const response = await request(app).get('/courses/CS1530/offerings').set('Origin', origin);
+        expect(response.status).toBe(200);
+        expect(response.headers['access-control-allow-origin']).toBe(origin);
+        const overview = await request(app).post('/offerings/1/overview/generate').set('Origin', origin).send({});
+        expect(overview.status).toBe(200);
+      }
+      const blocked = await request(app).get('/courses/CS1530/offerings').set('Origin', 'https://untrusted.example');
+      expect(blocked.headers['access-control-allow-origin']).toBeUndefined();
+      const blockedOverview = await request(app).post('/offerings/1/overview/generate').set('Origin', 'https://untrusted.example').send({});
+      expect(blockedOverview.status).toBe(403);
+      expect(generator).toHaveBeenCalledTimes(2);
+    } finally { config.WEB_ORIGIN = previous; }
+  });
   it('lists course summaries without private fields',async()=>{
     const response=await request(createApp(fakeRepository)).get('/schools/1247/courses');
     expect(response.body.data[0].courseCode).toBe('CS 1530');
