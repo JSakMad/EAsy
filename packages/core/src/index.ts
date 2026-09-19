@@ -1,5 +1,7 @@
 export const SCORE_WEIGHTS = { grade: 0.5, difficulty: 0.35, tags: 0.15 } as const;
 export const MINIMUM_REVIEWS = 5;
+export { CLASS_PREFERENCES, PERSONAL_SCORE_WEIGHT, calculatePersonalScore } from './personal-score.js';
+export type { ClassPreference, TagEvidence } from './personal-score.js';
 
 export const TAG_TYPES = [
   "notecard_allowed", "open_book_exam", "online_exams", "no_cumulative_final",

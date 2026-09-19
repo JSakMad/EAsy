@@ -3,8 +3,8 @@ import { BrowseExperience } from "@/components/browse-experience";
 import { checkStudentSetup } from "@/lib/profile-access";
 
 export default async function Home({searchParams}:{searchParams:Promise<{course?:string}>}) {
-  await checkStudentSetup();
+  const profile = await checkStudentSetup();
   const courses=await getCourses();
   const params=await searchParams;
-  return <BrowseExperience courses={courses.data} demo={courses.demo} initialCode={params.course} />;
+  return <BrowseExperience courses={courses.data} demo={courses.demo} initialCode={params.course} preferences={profile?.preferences ?? null} />;
 }

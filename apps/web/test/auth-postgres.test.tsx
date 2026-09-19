@@ -8,6 +8,7 @@ import { getMigrations } from "better-auth/db/migration";
 import { authOptions } from "../lib/auth";
 import { readAuthConfig } from "../lib/auth-config";
 import { getStudentProfile, saveStudentProfile } from "../lib/student-profile";
+import type { ClassPreference } from '@easy-a/core';
 
 vi.mock("server-only", () => ({}));
 const databaseURL = process.env.AUTH_TEST_DATABASE_URL;
@@ -35,6 +36,7 @@ describe.skipIf(!databaseURL)("PostgreSQL auth migration and OAuth lifecycle", (
     const migration = await readFile(new URL("../../../database/migrations/007_auth_accounts.sql", import.meta.url), "utf8");
     await pool.query(migration);
     await pool.query(await readFile(new URL("../../../database/migrations/008_student_profiles.sql", import.meta.url), "utf8"));
+    await pool.query(await readFile(new URL("../../../database/migrations/009_class_preferences.sql", import.meta.url), "utf8"));
     vi.stubGlobal("easyProfilePool", pool);
   });
   afterAll(async () => {
@@ -56,7 +58,7 @@ describe.skipIf(!databaseURL)("PostgreSQL auth migration and OAuth lifecycle", (
     const id = randomUUID();
     await pool.query('INSERT INTO auth_user (id, name, email) VALUES ($1, $2, $3)', [id, "Google Name", "profile@example.test"]);
     expect(await getStudentProfile(id)).toBeNull();
-    const profile = { name: "Chosen Name", schoolYear: "Third year", major: "Computer Science" };
+    const profile = { name: "Chosen Name", schoolYear: "Third year", major: "Computer Science", preferences: ['online_quizzes'] as ClassPreference[] };
     await saveStudentProfile(id, profile);
     expect(await getStudentProfile(id)).toEqual(profile);
     expect((await pool.query('SELECT name FROM auth_user WHERE id = $1', [id])).rows[0].name).toBe("Chosen Name");
@@ -65,6 +67,10 @@ describe.skipIf(!databaseURL)("PostgreSQL auth migration and OAuth lifecycle", (
     expect((await pool.query('SELECT name FROM auth_user WHERE id = $1', [id])).rows[0].name).toBe("Chosen Name");
     await saveStudentProfile(id, { ...profile, schoolYear: "Fourth year" });
     expect((await getStudentProfile(id))?.schoolYear).toBe("Fourth year");
+    await expect(saveStudentProfile(id, { ...profile, preferences: ['invalid'] as unknown as ClassPreference[] })).rejects.toThrow();
+    expect((await getStudentProfile(id))?.preferences).toEqual(['online_quizzes']);
+    await saveStudentProfile(id, { ...profile, preferences: [] });
+    expect((await getStudentProfile(id))?.preferences).toEqual([]);
     expect(await getStudentProfile("another-user")).toBeNull();
     await pool.query('DELETE FROM auth_user WHERE id = $1', [id]);
     expect(await getStudentProfile(id)).toBeNull();

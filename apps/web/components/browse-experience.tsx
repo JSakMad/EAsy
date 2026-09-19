@@ -8,11 +8,14 @@ import type {Course,Offering} from '@/lib/types';
 import {demoOfferings} from '@/lib/demo-data';
 import {SiteHeader} from './site-header';
 import {SubjectIcon} from './subject-icon';
+import {calculatePersonalScore, type ClassPreference} from '@easy-a/core';
+import {PersonalScoreNote} from './personal-score-note';
 
 type SortKey='score'|'reviews'|'difficulty';
 const compact=(s:string)=>s.normalize('NFKC').toLowerCase().replace(/\s+/g,'');
 
-export function BrowseExperience({courses,demo,initialCode}:{courses:Course[];demo:boolean;initialCode?:string}) {
+export function BrowseExperience({courses,demo,initialCode,preferences=null}:{courses:Course[];demo:boolean;initialCode?:string;preferences?:ClassPreference[]|null}) {
+  const personalized=preferences!==null&&!demo;
   const [selected,setSelected]=useState<Course|null>(()=>courses.find(c=>c.courseCode===normalizeCourseCode(initialCode??'',{}))??null);
   const [query,setQuery]=useState('');
   const [subject,setSubject]=useState('all');
@@ -62,10 +65,11 @@ export function BrowseExperience({courses,demo,initialCode}:{courses:Course[];de
     window.history.replaceState(null,'','/');
     requestAnimationFrame(()=>searchInput.current?.focus());
   }
-  const visible=useMemo(()=>offerings.filter(o=>tags.every(t=>o.tags.includes(t))).sort((a,b)=>{
-    const result=sort==='reviews'?b.reviewCount-a.reviewCount:sort==='difficulty'?(a.avgDifficulty??99)-(b.avgDifficulty??99):(b.score??-1)-(a.score??-1);
+  const ranked=useMemo(()=>offerings.map(o=>({...o,displayScore:personalized?calculatePersonalScore(o,preferences??[]).score:o.score})),[offerings,preferences,personalized]);
+  const visible=useMemo(()=>ranked.filter(o=>tags.every(t=>o.tags.includes(t))).sort((a,b)=>{
+    const result=sort==='reviews'?b.reviewCount-a.reviewCount:sort==='difficulty'?(a.avgDifficulty??99)-(b.avgDifficulty??99):(b.displayScore??-1)-(a.displayScore??-1);
     return result||b.reviewCount-a.reviewCount||a.professorName.localeCompare(b.professorName);
-  }),[offerings,tags,sort]);
+  }),[ranked,tags,sort]);
 
   return <main>
     <div className="shell"><SiteHeader/></div>
@@ -80,11 +84,11 @@ export function BrowseExperience({courses,demo,initialCode}:{courses:Course[];de
           <div className="hero-steps"><span>01 Find a course</span><i/><span>02 Compare professors</span><i/><span>03 Choose your fit</span></div>
         </div>
         <aside className="formula-card entrance-card">
-          <div className="formula-top"><span>Behind the EAsy score</span><span className="version">50 / 35 / 15</span></div>
+          {personalized?<div className="personal-formula"><p className="section-kicker">YOUR PERSONAL SCORE</p><h2>Your preferences matter.</h2><p>Professor scores start with student-reported grades, difficulty, and class structure. Evidence of features you prefer adds a boost.</p><p>Repeated review mentions carry more weight. Unreported features remain unknown.</p><Link href="/account/setup">Edit your preferences</Link></div>:<><div className="formula-top"><span>Behind the EAsy score</span><span className="version">50 / 35 / 15</span></div>
           <div className="formula-score"><span>50</span><small>%</small><b>reported A grades</b></div>
           <div className="formula-row"><div><strong>35%</strong><span>lower difficulty</span></div><div><strong>15%</strong><span>class structure</span></div></div>
           <div className="formula-note"><Info size={15}/> Student-reported signals, not a grade guarantee. At least 5 reviews required for a score.</div>
-        </aside>
+        </>} </aside>
       </div>
     </section>
 
@@ -111,12 +115,13 @@ export function BrowseExperience({courses,demo,initialCode}:{courses:Course[];de
             <div className="filter-groups">{TAG_GROUPS.map(group=><details key={group.label} open={group.label==='Exam format'}><summary>{group.label}<span>{group.tags.filter(t=>tags.includes(t)).length||''}</span></summary><div className="check-list">{group.tags.map(tag=><label key={tag} className={tags.includes(tag)?'checked':''}><input type="checkbox" checked={tags.includes(tag)} onChange={()=>setTags(old=>old.includes(tag)?old.filter(t=>t!==tag):[...old,tag])}/><span className="fake-check">✓</span><span>{TAG_LABELS[tag]}</span></label>)}</div></details>)}</div>
           </aside>
           <div className="results" aria-busy={loading}>
-            <div className="results-head"><div><p>Compare professors for</p><h2 ref={resultsHeading} tabIndex={-1}>{selected.courseCode}</h2></div><label className="sort-field">Sort by <select aria-label="Sort professors" value={sort} onChange={e=>setSort(e.target.value as SortKey)}><option value="score">Highest EAsy score</option><option value="difficulty">Lowest difficulty</option><option value="reviews">Most reviews</option></select></label></div>
+            <div className="results-head"><div><p>Compare professors for</p><h2 ref={resultsHeading} tabIndex={-1}>{selected.courseCode}</h2></div><label className="sort-field">Sort by <select aria-label="Sort professors" value={sort} onChange={e=>setSort(e.target.value as SortKey)}><option value="score">{personalized?"Highest personal score":"Highest EAsy score"}</option><option value="difficulty">Lowest difficulty</option><option value="reviews">Most reviews</option></select></label></div>
             {selected.courseTitle&&<p>{selected.courseTitle}</p>}
             <p className="coverage-note">Historical professor/course comparisons—not confirmed current sections. A higher score suggests easier reported outcomes, not a guaranteed A.</p>
+            {personalized&&<div className="personal-ranking-note">Scores reflect your saved class preferences. <Link href="/account/setup">Edit preferences</Link>. A matching feature boosts a score when reviews support it; an unreported feature stays unknown.</div>}
             <div className="active-tags">{tags.map(t=><button key={t} onClick={()=>setTags(old=>old.filter(tag=>tag!==t))}>{TAG_LABELS[t]} ×</button>)}</div>
             <p className="comparison-count" role="status">{loading?'Loading professors…':error?'Comparison unavailable':`${visible.length} professor${visible.length===1?'':'s'}${tags.length?' matching your filters':''}`}</p>
-            {error?<div className="empty-state" role="alert"><p>{error}</p><button className="load-more" onClick={()=>setRetry(n=>n+1)}>Try again</button></div>:<div className="offering-list">{!loading&&visible.map((o,i)=><OfferingCard key={o.id} offering={o} rank={i+1}/>)}
+            {error?<div className="empty-state" role="alert"><p>{error}</p><button className="load-more" onClick={()=>setRetry(n=>n+1)}>Try again</button></div>:<div className="offering-list">{!loading&&visible.map((o,i)=><OfferingCard key={o.id} offering={o} rank={i+1} preferences={personalized?preferences:null}/>)}
               {!loading&&visible.length===0&&<div className="empty-state"><Search size={26}/><h3>No matching professors</h3><p>{tags.length?'Remove a filter to see more professors for this course.':'No imported professor reviews are available for this course yet.'}</p></div>}
             </div>}
           </div>
@@ -127,12 +132,13 @@ export function BrowseExperience({courses,demo,initialCode}:{courses:Course[];de
   </main>;
 }
 
-function OfferingCard({offering:o,rank}:{offering:Offering;rank:number}) {
-  const scored=o.score!==null;
+export function OfferingCard({offering:o,rank,preferences=null}:{offering:Offering;rank:number;preferences?:ClassPreference[]|null}) {
+  const score=preferences===null?o.score:calculatePersonalScore(o,preferences).score;
+  const scored=score!==null;
   return <article className={`offering-card ${scored?'':'unscored'}`}>
     <div className="rank">{String(rank).padStart(2,'0')}</div>
-    <div className={`score-orb ${scored&&o.score!>=80?'high':scored&&o.score!>=70?'mid':'low'}`}><strong>{scored?Math.round(o.score!):'—'}</strong><span>{scored?'EAsy / 100':'UNSCORED'}</span></div>
-    <div className="offering-main"><div className="course-line"><span>{o.courseCode}</span><i/><span>{o.department}</span></div><h3>{o.professorName}</h3><div className="tags-row">{o.tags.slice(0,4).map(t=><span key={t}>{TAG_LABELS[t]}</span>)}</div><p className="professor-metrics">{o.avgDifficulty===null?'No difficulty data':`${Number(o.avgDifficulty).toFixed(1)}/5 difficulty`} · {o.gradeAPct===null?'No grade reports':`${Math.round(o.gradeAPct)}% reported A grades`}</p></div>
+    <div className={`score-orb ${scored&&score!>=80?'high':scored&&score!>=70?'mid':'low'}`}><strong>{scored?Math.round(score!):'—'}</strong><span>{scored?(preferences===null?'EAsy / 100':'FOR YOU / 100'):'UNSCORED'}</span></div>
+    <div className="offering-main"><div className="course-line"><span>{o.courseCode}</span><i/><span>{o.department}</span></div><h3>{o.professorName}</h3><div className="tags-row">{o.tags.slice(0,4).map(t=><span key={t}>{TAG_LABELS[t]}</span>)}</div><p className="professor-metrics">{o.avgDifficulty===null?'No difficulty data':`${Number(o.avgDifficulty).toFixed(1)}/5 difficulty`} · {o.gradeAPct===null?'No grade reports':`${Math.round(o.gradeAPct)}% reported A grades`}</p>{preferences!==null&&<PersonalScoreNote offering={o} preferences={preferences}/>}</div>
     <div className="sample"><strong>{o.reviewCount}</strong><span>reviews</span><small className={o.reviewCount>=25?'strong':'limited'}>{o.reviewCount>=25?'larger sample':'limited sample'}</small></div>
     <Link className="details-link" href={`/offerings/${o.id}`} aria-label={`View ${o.courseCode} with ${o.professorName}`}><ArrowUpRight size={20}/></Link>
     {!scored&&<div className="insufficient">Needs at least 5 reviews to receive a score</div>}

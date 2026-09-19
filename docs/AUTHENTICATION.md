@@ -6,6 +6,8 @@ EAsy uses the open-source Better Auth library with Google OAuth / OpenID Connect
 
 ## User experience
 
+- Students now review class-preference checkboxes during setup. Apply migration `009_class_preferences.sql` as well. Personal scores replace the displayed review-based score for signed-in students; see [personal scoring](PERSONAL_SCORING.md) for the formula and data limitations.
+
 - After Google sign-in, new and existing users without a student profile must confirm their name and enter their year of schooling and major at `/account/setup`. Signed-in account, course browsing, and offering pages enforce this on the server. Anonymous browsing remains public.
 - `/account` shows the saved details and links to **Edit profile**. The name starts with the Google-provided value but must be submitted with the other required fields. Students may enter **Undeclared** as their major.
 - Apply migration `008_student_profiles.sql` with `npm.cmd run db:migrate` before running this version. The web database role also needs SELECT/INSERT/UPDATE on `auth_student_profile`; the migration revokes PUBLIC access. Profiles are private, linked to the authenticated user, and deleted automatically when that user is deleted.

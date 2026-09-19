@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SignOut } from "@/components/auth-controls";
 import { requireStudentProfile } from "@/lib/profile-access";
+import { CLASS_PREFERENCES } from '@easy-a/core';
 
 export const metadata: Metadata = { title: "My account", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ export default async function AccountPage() {
           <dt>Email</dt><dd>{user.email}</dd>
           <dt>Year of schooling</dt><dd>{profile.schoolYear}</dd>
           <dt>Major</dt><dd>{profile.major}</dd>
+          <dt>Class preferences</dt><dd>{CLASS_PREFERENCES.filter(p => profile.preferences?.includes(p.id)).map(p => p.label).join(', ') || 'No preferences selected'}</dd>
           <dt>Sign-in method</dt><dd>Google</dd>
           <dt>Member since</dt><dd>{new Intl.DateTimeFormat("en-US", {
             dateStyle: "long", timeZone: "UTC",

@@ -15,6 +15,13 @@ const LATEST_SCORE = `LEFT JOIN LATERAL (
 
 function slugSql(column: string) { return `trim(both '-' from lower(regexp_replace(${column}, '[^a-zA-Z0-9]+', '-', 'g')))`; }
 
+const TAG_EVIDENCE = `LEFT JOIN LATERAL (
+  SELECT jsonb_object_agg(mentions.tag_type, mentions.review_count) AS tag_evidence
+  FROM (SELECT et.tag_type, count(DISTINCT er.id)::int AS review_count
+    FROM reviews er JOIN tags et ON et.review_id=er.id
+    WHERE er.offering_id=o.id GROUP BY et.tag_type) mentions
+) evidence ON true`;
+
 export const repository: Repository = {
   async courses(schoolId) {
     const result = await pool.query(`SELECT c.course_code,c.course_title,count(DISTINCT p.id)::int AS professor_count,
@@ -43,10 +50,12 @@ export const repository: Repository = {
       `SELECT o.id,c.course_code,c.course_title,p.name AS professor_name,p.department,p.rmp_legacy_id,
        s.score,s.grade_a_pct,s.grade_response_count,s.avg_difficulty,s.tag_bonus,s.review_count,
        s.grade_component,s.difficulty_component,s.tag_component,s.computed_at,
+       coalesce(evidence.tag_evidence,'{}'::jsonb) AS tag_evidence,
        coalesce(array_remove(array_agg(DISTINCT t.tag_type),NULL),'{}') AS tags
        FROM professor_course_offerings o
        JOIN professors p ON p.id=o.professor_id JOIN courses c ON c.id=o.course_id
        ${LATEST_SCORE}
+       ${TAG_EVIDENCE}
        LEFT JOIN reviews r ON r.offering_id=o.id LEFT JOIN tags t ON t.review_id=r.id
        WHERE ($1::text IS NULL OR ${slugSql("p.department")}=$1) AND NOT p.is_demo
        AND ($2::text IS NULL OR c.course_code=$2)
@@ -55,7 +64,7 @@ export const repository: Repository = {
        AND EXISTS (SELECT 1 FROM reviews actual WHERE actual.offering_id=o.id)
        GROUP BY o.id,c.course_code,c.course_title,p.name,p.department,p.rmp_legacy_id,
        s.score,s.grade_a_pct,s.grade_response_count,s.avg_difficulty,s.tag_bonus,s.review_count,
-       s.grade_component,s.difficulty_component,s.tag_component,s.computed_at
+       s.grade_component,s.difficulty_component,s.tag_component,s.computed_at,evidence.tag_evidence
        ORDER BY s.score DESC NULLS LAST,s.review_count DESC NULLS LAST,c.course_code,p.name`, [departmentId,courseCode ?? null,PITT_SUBJECT_CODES],
     );
     return result.rows.map(camelize);
@@ -66,10 +75,12 @@ export const repository: Repository = {
        p.overall_quality,p.overall_difficulty,p.would_take_again_pct,
        s.score,s.grade_a_pct,s.grade_response_count,s.avg_difficulty,s.tag_bonus,s.review_count,
        s.grade_component,s.difficulty_component,s.tag_component,s.computed_at,
+       coalesce(evidence.tag_evidence,'{}'::jsonb) AS tag_evidence,
        coalesce(array_remove(array_agg(DISTINCT t.tag_type),NULL),'{}') AS tags
        FROM professor_course_offerings o
        JOIN professors p ON p.id=o.professor_id JOIN courses c ON c.id=o.course_id
        ${LATEST_SCORE}
+       ${TAG_EVIDENCE}
        LEFT JOIN reviews r ON r.offering_id=o.id LEFT JOIN tags t ON t.review_id=r.id
        WHERE o.id=$1 AND NOT p.is_demo
        AND split_part(c.course_code,' ',1)=ANY($2::text[])
@@ -77,7 +88,7 @@ export const repository: Repository = {
        GROUP BY o.id,c.course_code,c.course_title,p.name,p.department,p.rmp_legacy_id,
        p.overall_quality,p.overall_difficulty,p.would_take_again_pct,
        s.score,s.grade_a_pct,s.grade_response_count,s.avg_difficulty,s.tag_bonus,s.review_count,
-       s.grade_component,s.difficulty_component,s.tag_component,s.computed_at`, [id,PITT_SUBJECT_CODES],
+       s.grade_component,s.difficulty_component,s.tag_component,s.computed_at,evidence.tag_evidence`, [id,PITT_SUBJECT_CODES],
     );
     return result.rows[0] ? camelize(result.rows[0]) : null;
   },

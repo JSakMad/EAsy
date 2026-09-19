@@ -16,9 +16,9 @@ export default async function ProfileSetupPage() {
     <main className="auth-main">
       <section className="auth-card" aria-labelledby="profile-title">
         <p className="section-kicker">Your EAsy account</p>
-        <h1 id="profile-title">{profile ? "Edit your profile" : "Tell us about yourself"}</h1>
-        <p>{profile ? "Keep your student details up to date." : "Confirm your name and add your year of schooling and major to finish setting up your account."}</p>
-        <ProfileForm initial={profile ?? { name: user.name, schoolYear: "", major: "" }} editing={Boolean(profile)} />
+        <h1 id="profile-title">{profile?.preferences === null ? "Choose your class preferences" : profile ? "Edit your profile" : "Tell us about yourself"}</h1>
+        <p>{profile ? "Review your details and choose the class features you prefer to personalize professor scores." : "Confirm your name, add your year of schooling and major, and choose your class preferences to finish setting up your account."}</p>
+        <ProfileForm initial={profile ?? { name: user.name, schoolYear: "", major: "", preferences: null }} editing={Boolean(profile)} />
         <SignOut />
       </section>
     </main>

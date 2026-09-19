@@ -15,7 +15,7 @@ import { validateProfile } from "../lib/profile-fields";
 
 function form(values: Record<string, string> = {}) {
   const data = new FormData();
-  for (const [key, value] of Object.entries({ name: " Alex Student ", schoolYear: "Second year", major: "Computer Science", ...values })) data.set(key, value);
+  for (const [key, value] of Object.entries({ name: " Alex Student ", schoolYear: "Second year", major: "Computer Science", preferencesReviewed: "1", ...values })) data.set(key, value);
   return data;
 }
 beforeEach(() => {
@@ -24,6 +24,16 @@ beforeEach(() => {
 });
 
 describe("profile form validation and authorization", () => {
+  it('validates preferences and distinguishes an empty selection from unfinished setup', () => {
+    expect(validateProfile(form({ preferencesReviewed: '' })).valid).toBe(false);
+    expect(validateProfile(form({ preferences: 'forged-preference' })).valid).toBe(false);
+    const data = form();
+    data.append('preferences', 'online_quizzes');
+    data.append('preferences', 'online_classes');
+    data.append('preferences', 'online_quizzes');
+    expect(validateProfile(data).profile.preferences).toEqual(['online_quizzes', 'online_classes']);
+    expect(validateProfile(form()).profile.preferences).toEqual([]);
+  });
   it("rejects blank, oversized, and unsupported values", () => {
     const invalid: Record<string, string>[] = [{ name: "   " }, { major: "   " }, { schoolYear: "forged" }, { name: "x".repeat(101) }, { major: "x".repeat(121) }];
     for (const values of invalid) {
@@ -45,7 +55,7 @@ describe("profile form validation and authorization", () => {
   });
   it("saves only to the session owner, ignoring a submitted user ID", async () => {
     await expect(saveProfile({}, form({ userId: "someone-else" }))).rejects.toThrow("Redirect: /account");
-    expect(mocks.save).toHaveBeenCalledWith("signed-in-user", { name: "Alex Student", schoolYear: "Second year", major: "Computer Science" });
+    expect(mocks.save).toHaveBeenCalledWith("signed-in-user", { name: "Alex Student", schoolYear: "Second year", major: "Computer Science", preferences: [] });
     expect(mocks.revalidate).toHaveBeenCalledWith("/", "layout");
   });
   it("returns a retry message without exposing database errors", async () => {
@@ -58,12 +68,16 @@ describe("profile form validation and authorization", () => {
 });
 
 describe("required student setup", () => {
+  it("asks existing students to review preferences once", async () => {
+    mocks.getProfile.mockResolvedValue({ name: 'Student', schoolYear: 'First year', major: 'Undeclared', preferences: null });
+    await expect(requireStudentProfile()).rejects.toThrow('Redirect: /account/setup');
+  });
   it("redirects existing accounts without a profile", async () => {
     mocks.getProfile.mockResolvedValue(null);
     await expect(requireStudentProfile()).rejects.toThrow("Redirect: /account/setup");
   });
   it("allows completed accounts and uses their saved profile", async () => {
-    const profile = { name: "Student", schoolYear: "First year", major: "Undeclared" };
+    const profile = { name: "Student", schoolYear: "First year", major: "Undeclared", preferences: [] };
     mocks.getProfile.mockResolvedValue(profile);
     expect((await requireStudentProfile()).profile).toEqual(profile);
     expect(mocks.getProfile).toHaveBeenCalledWith("signed-in-user");
