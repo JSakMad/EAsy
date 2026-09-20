@@ -22,6 +22,8 @@ Checker version 2 denotes Groq-based checks. Version 1 rule-based records are pr
 
 ## Deployment
 
+PDF standard fonts and character maps come from the bundled pdfjs-dist assets. The server reads them from disk, and Next.js output tracing includes them with the offering routes for Vercel/standalone deployment. No font CDN or additional environment variable is needed.
+
 Set the existing server-only GROQ_API_KEY in apps/web/.env.local for local development and in the Next.js/Vercel production environment. The Render/API key alone is not visible to Next.js. Never use a NEXT_PUBLIC variable for this key. Local configuration was updated to use the existing project key.
 
 No new migration is required for the AI/Word update. Migration 011_syllabus_verification.sql from the original upload feature must already be applied with npm run db:migrate. It creates private, RLS-enabled verification and upload-attempt tables; configure grants/policies for restricted roles if needed. Deploy the web app with the updated lockfile. The API service does not need code changes for this update.

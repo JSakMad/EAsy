@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SyllabusError } from '../lib/syllabus-check';
 import { extractSyllabus } from '../lib/syllabus-file';
+import { SyllabusPdfBinaryDataFactory } from '../lib/syllabus-pdf-assets';
 
 vi.mock('server-only',()=>({}));
 const mocks = vi.hoisted(()=>({ auth:vi.fn(), review:vi.fn(), reserve:vi.fn(), save:vi.fn(), revalidate:vi.fn(), verify:vi.fn() }));
@@ -21,16 +22,23 @@ describe('conservative syllabus checks',()=>{
     for(const file of [new File(['not a pdf'],'test.pdf',{type:'application/pdf'}),new File([text],'test.docx'),new File([],'empty.txt',{type:'text/plain'}),new File([new Uint8Array(2*1024*1024+1)],'large.txt',{type:'text/plain'})]) await expect(extractSyllabus(file)).rejects.toThrow();
     expect((await extractSyllabus(new File([text],'syllabus.txt',{type:'text/plain'}))).text).toBe(text);
   });
-  it('extracts actual PDF text and preserves the uploaded bytes for hashing',async()=>{
+  it.each(['Helvetica', 'Times-Roman', 'Courier'])('extracts %s PDFs using bundled fonts without font warnings',async(font)=>{
+    const assets=vi.spyOn(SyllabusPdfBinaryDataFactory.prototype,'fetch');
+    const log=vi.spyOn(console,'log');
+    const warn=vi.spyOn(console,'warn');
+    try {
     const content='BT /F1 12 Tf 40 750 Td '+text.split('\n').map(line=>`(${line}) Tj 0 -18 Td`).join(' ')+' ET';
-    const objects=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',`<< /Length ${content.length} >>\nstream\n${content}\nendstream`];
+    const objects=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',`<< /Type /Font /Subtype /Type1 /BaseFont /${font} >>`,`<< /Length ${content.length} >>\nstream\n${content}\nendstream`];
     let pdf='%PDF-1.4\n';const offsets=[0];
     objects.forEach((object,i)=>{offsets.push(pdf.length);pdf+=`${i+1} 0 obj\n${object}\nendobj\n`;});
     const xref=pdf.length;pdf+=`xref\n0 6\n0000000000 65535 f \n${offsets.slice(1).map(offset=>String(offset).padStart(10,'0')+' 00000 n ').join('\n')}\ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
     const result=await extractSyllabus(new File([pdf],'syllabus.pdf',{type:'application/pdf'}));
     expect(result.text).toContain('CS0447');
-    expect(result.text).toContain('All quizzes are online.');
+    expect(result.text.replace(/\s+/g,' ')).toContain('All quizzes are online.');
     expect(result.bytes.byteLength).toBe(pdf.length);
+    expect(assets).toHaveBeenCalledWith(expect.objectContaining({kind:'standardFontDataUrl'}));
+    expect(JSON.stringify([...log.mock.calls,...warn.mock.calls])).not.toMatch(/standardFontDataUrl|Unable to load font/);
+    } finally { assets.mockRestore();log.mockRestore();warn.mockRestore(); }
   });
 });
 

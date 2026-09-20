@@ -1,6 +1,7 @@
 import 'server-only';
 import { extractWord } from './syllabus-word';
 import { getDocumentProxy } from 'unpdf';
+import { syllabusPdfOptions } from './syllabus-pdf-assets';
 import { SyllabusError, SYLLABUS_MAX_BYTES } from './syllabus-check';
 
 export async function extractSyllabus(file: File) {
@@ -16,7 +17,7 @@ export async function extractSyllabus(file: File) {
   } else if (/\.pdf$/i.test(file.name) && (!file.type || file.type === 'application/pdf') && new TextDecoder().decode(bytes.slice(0, 5)) === '%PDF-') {
     let pdf: Awaited<ReturnType<typeof getDocumentProxy>> | undefined;
     try {
-      pdf = await getDocumentProxy(bytes.slice(), { useSystemFonts: false });
+      pdf = await getDocumentProxy(bytes.slice(), syllabusPdfOptions);
       if (pdf.numPages > 30) throw new SyllabusError('Please upload a syllabus with no more than 30 pages.');
       for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
         const page = await pdf.getPage(pageNumber);
