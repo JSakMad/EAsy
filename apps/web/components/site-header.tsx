@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { AccountNav } from "./account-nav";
+import { SchoolSwitcher } from './school-switcher';
 
-export function SiteHeader() {
+export function SiteHeader({ school = 'pitt' }: { school?: 'pitt' | 'lsu' }) {
   return <header className="site-header">
-    <Link href="/" className="brand" aria-label="EAsy home">
+    <Link href={school === 'lsu' ? '/schools/lsu' : '/'} className="brand" aria-label="EAsy home">
       <span className="wordmark">E<span>A</span>sy<span className="brand-period">.</span></span>
     </Link>
     <div className="header-actions">
-      <div className="school-pill">An unofficial Pitt course guide</div>
-      <AccountNav />
+      <SchoolSwitcher school={school} />
+      {school === 'pitt' ? <AccountNav /> : <span className="school-pill">Demo edition</span>}
     </div>
   </header>;
 }
