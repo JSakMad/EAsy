@@ -102,3 +102,8 @@ See [team setup](TEAM_SETUP.md), [architecture](docs/ARCHITECTURE.md), [authenti
 ## Scoring
 
 The base EAsy score combines self-reported A/A− outcomes, inverted difficulty, and distinct class-structure signals. Missing grades are excluded from the grade denominator, and offerings with too little evidence show an insufficient-data state. Signed-in students can optionally apply a bounded preference adjustment. This is a comparison tool, not a predicted grade or guarantee.
+
+## Team Members
+
+Joshua Sakolsky-Madaras - JSakMad7@gmail.com
+Gabe Zuccolotto - gabezuccolotto@gmail.com
