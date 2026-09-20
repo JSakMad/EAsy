@@ -55,6 +55,17 @@ describe('Groq request and sampling safeguards',()=>{
     const fetcher=vi.fn(async()=>{throw new Error('synthetic-test-key');});
     await expect(new GroqSummarizer('synthetic-test-key',fetcher as typeof fetch).summarize(reviews)).rejects.toThrow(/^provider$/);
   });
+  it('instructs qualitative grading descriptions while still rejecting copied percentages',async()=>{
+    const source=reviews.map(r=>({...r,text:'The final exam accounts for 40% of the course grade.'}));
+    const fetcher=vi.fn(async()=>Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(summary)}}]}));
+    await expect(new GroqSummarizer('synthetic-test-key',fetcher as typeof fetch).summarize(source)).resolves.toEqual(summary);
+    const calls=fetcher.mock.calls as unknown as [string,RequestInit][];
+    const body=JSON.parse(String(calls[0]![1].body));
+    expect(body.messages[0].content).toContain('Never include percentages or the percent sign, even when a review supplies them');
+    expect(JSON.parse(body.messages[1].content).untrustedReviews[0].text).toContain('40%');
+    const unsafe=vi.fn(async()=>Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify({...summary,harderFactors:['The final exam is 40% of the grade.']})}}]}));
+    await expect(new GroqSummarizer('synthetic-test-key',unsafe as typeof fetch).summarize(source)).rejects.toThrow(/^validation$/);
+  });
   it('rejects truncated, malformed, copied, or unsafe output',async()=>{
     for(const result of [{finish_reason:'length',message:{content:JSON.stringify(summary)}},{finish_reason:'stop',message:{content:'invalid'}},{finish_reason:'stop',message:{content:JSON.stringify({...summary,summary:'https://evil.invalid'})}}]) {
       const fetcher=vi.fn(async()=>Response.json({choices:[result]}));
