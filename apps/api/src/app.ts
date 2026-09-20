@@ -25,7 +25,11 @@ export function createApp(repository: Repository = defaultRepository,overviewRea
   });
   app.get('/courses/:code/offerings', async (req,res,next) => {
     try {
-      const code=normalizeCourseCode(req.params.code!,{});
+      let code=normalizeCourseCode(req.params.code!,{});
+      if(code.startsWith('UNMAPPED ')) {
+        const catalogCode=req.params.code!.trim().toUpperCase().match(/^([A-Z][A-Z &]*?)\s*(\d{3,5}[A-Z]*)$/);
+        if(catalogCode) code=`${catalogCode[1]!.trim()} ${catalogCode[2]}`;
+      }
       if(code.startsWith('UNMAPPED ')) return res.status(400).json({error:'Use a subject and course number, such as CS 1530.'});
       let rows=await repository.offerings(null,code);
       const tags=String(req.query.tags ?? '').split(',').filter(t=>TAG_TYPES.includes(t as never));

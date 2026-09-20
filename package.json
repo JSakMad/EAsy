@@ -10,6 +10,7 @@
     "test": "npm run build -w @easy-a/core && npm run test -w @easy-a/core && npm run test -w @easy-a/api && npm run test -w @easy-a/web",
     "typecheck": "npm run build -w @easy-a/core && npm run typecheck --workspaces --if-present",
     "db:migrate": "npm run db:migrate -w @easy-a/api",
+    "catalog:import": "node scripts/import-catalog.mjs",
     "db:seed": "npm run build -w @easy-a/core && npm run db:seed -w @easy-a/api",
     "preingest": "npm run build -w @easy-a/core",
     "ingest": "npm run ingest -w @easy-a/api --",

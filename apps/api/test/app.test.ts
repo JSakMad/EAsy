@@ -16,6 +16,12 @@ const fakeRepository: Repository = {
 };
 
 describe("API", () => {
+  it('preserves catalog course suffixes outside the imported subject vocabulary', async () => {
+    const offerings=vi.fn().mockResolvedValue([]);
+    const response=await request(createApp({...fakeRepository,offerings})).get('/courses/nur1140is/offerings');
+    expect(response.status).toBe(200);
+    expect(offerings).toHaveBeenCalledWith(null,'NUR 1140IS');
+  });
   it('accepts configured web origins with trailing slashes without allowing other origins', async () => {
     const previous = config.WEB_ORIGIN;
     try {

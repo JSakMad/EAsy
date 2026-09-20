@@ -10,7 +10,7 @@ The original score is the starting point: reported grades (50%), lower difficult
 
 ```text
 support for each selected preference = min(1, distinct review mentions / 3)
-coverage = sum(support) / number of selected preferences with available data types
+coverage = sum(support) / number of selected preferences
 personal score = original score + (100 - original score) × 0.30 × coverage
 ```
 
@@ -24,7 +24,7 @@ Preference matching adds no raw review text to the public API. It exposes only p
 
 Online quizzes, online exams, open-book exams, optional attendance, flexible deadlines, group projects, provided study materials, less homework, quiz retakes, extra credit, and no cumulative final map to existing historical review tags.
 
-**Online classes** can be selected and saved, but do not affect scores yet. The current dataset has no reliable delivery-mode field. Online quizzes or optional attendance are never treated as evidence that the class itself is online. This limitation appears in setup and score explanations.
+**Online classes** now affects scores when explicitly reported in an EAsy student review. Imported online quizzes or optional attendance are never treated as evidence that the class itself is online. Direct student feature reports are supplied as `preferenceEvidence`; the scorer uses the maximum direct count or related-tag count to avoid double counting. See [course reviews](COURSE_REVIEWS.md).
 
 These are historical reports for a professor/course pairing, not verified current section policies. Each personalized card lists supported preferences, and the detail page shows supporting mention counts and unreported preferences.
 

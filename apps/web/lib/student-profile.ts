@@ -1,22 +1,6 @@
 import "server-only";
-import { Pool } from "pg";
-import { readAuthConfig } from "./auth-config";
 import type { StudentProfile } from "./profile-fields";
-
-const globalProfile = globalThis as typeof globalThis & { easyProfilePool?: Pool };
-function database() {
-  if (!globalProfile.easyProfilePool) {
-    const config = readAuthConfig();
-    const pool = new Pool({
-      connectionString: config.databaseURL,
-      ssl: config.databaseSSL ? { rejectUnauthorized: true } : undefined,
-      max: 2, connectionTimeoutMillis: 5000, idleTimeoutMillis: 30000,
-    });
-    pool.on("error", () => console.error("Profile database connection failed"));
-    globalProfile.easyProfilePool = pool;
-  }
-  return globalProfile.easyProfilePool;
-}
+import { webDatabase as database } from './web-database';
 
 export async function getStudentProfile(userId: string): Promise<StudentProfile | null> {
   const result = await database().query<StudentProfile>(

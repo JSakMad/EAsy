@@ -15,6 +15,12 @@ const offerings = [
 function response() { vi.stubGlobal('fetch', vi.fn().mockImplementation(async () => Response.json({ data: offerings }))); }
 
 describe('personalized course comparisons', () => {
+  it('opens a catalog course with a special suffix from its comparison link', async () => {
+    response();
+    render(<BrowseExperience courses={[{...courses[0]!,courseCode:'NUR 1140IS'}]} demo={false} initialCode="NUR1140IS" />);
+    await waitFor(() => expect(screen.getAllByRole('article')).toHaveLength(2));
+    expect(screen.getByRole('heading',{name:'NUR 1140IS'})).toBeTruthy();
+  });
   it('replaces scores and orders professors by preferences', async () => {
     response();
     render(<BrowseExperience courses={courses} demo={false} initialCode="CS 0447" preferences={['online_quizzes']} />);
@@ -41,6 +47,6 @@ describe('personalized course comparisons', () => {
     const form = new FormData(container.querySelector('form')!);
     expect(form.getAll('preferences')).toEqual([]);
     expect(form.get('preferencesReviewed')).toBe('1');
-    expect(screen.getByText(/Class-format data isn't available yet/)).toBeTruthy();
+    expect(screen.getByText(/Matches use online-class reports from EAsy students/)).toBeTruthy();
   });
 });

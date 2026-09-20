@@ -16,7 +16,7 @@ const compact=(s:string)=>s.normalize('NFKC').toLowerCase().replace(/\s+/g,'');
 
 export function BrowseExperience({courses,demo,initialCode,preferences=null}:{courses:Course[];demo:boolean;initialCode?:string;preferences?:ClassPreference[]|null}) {
   const personalized=preferences!==null&&!demo;
-  const [selected,setSelected]=useState<Course|null>(()=>courses.find(c=>c.courseCode===normalizeCourseCode(initialCode??'',{}))??null);
+  const [selected,setSelected]=useState<Course|null>(()=>courses.find(c=>c.courseCode===normalizeCourseCode(initialCode??'',{})||compact(c.courseCode)===compact(initialCode??''))??null);
   const [query,setQuery]=useState('');
   const [subject,setSubject]=useState('all');
   const [limit,setLimit]=useState(24);
@@ -93,6 +93,7 @@ export function BrowseExperience({courses,demo,initialCode,preferences=null}:{co
     </section>
 
     <section id="course-finder" className="finder shell course-finder">
+      <p className="personal-ranking-note">Want to review a class or find one that is not listed here? <Link href="/catalog">Search the full course catalog and add a review.</Link></p>
       {demo&&<div className="demo-banner"><span>DEMO DATA</span> The API is unavailable. These fictional examples are not real professor recommendations.</div>}
       {!selected?<>
         <div className="finder-toolbar course-toolbar">

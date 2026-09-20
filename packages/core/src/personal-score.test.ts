@@ -18,8 +18,9 @@ describe('personalized professor scores', () => {
   });
   it('never infers online classes from online quizzes', () => {
     expect(calculatePersonalScore(offering, ['online_classes']).score).toBe(60);
-    expect(calculatePersonalScore(offering, ['online_classes']).unavailable).toEqual(['Online classes']);
-    expect(calculatePersonalScore(offering, ['online_classes', 'online_quizzes']).score).toBe(72);
+    expect(calculatePersonalScore(offering, ['online_classes']).unknown).toEqual(['Online classes']);
+    expect(calculatePersonalScore(offering, ['online_classes', 'online_quizzes']).score).toBe(66);
+    expect(calculatePersonalScore({ ...offering, preferenceEvidence: { online_classes: 3 } }, ['online_classes']).score).toBe(72);
   });
   it('does not double count repeated choices or related tags', () => {
     expect(calculatePersonalScore(offering, ['online_quizzes', 'online_quizzes']).score).toBe(72);

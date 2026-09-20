@@ -1,4 +1,4 @@
-import type { TagType, TagEvidence } from "@easy-a/core";
+import type { TagType, TagEvidence, ClassPreference } from "@easy-a/core";
 
 export interface Department { id: string; name: string; offeringCount: number }
 export interface Course {courseCode:string;courseTitle:string|null;professorCount:number;reviewCount:number}
@@ -26,6 +26,9 @@ export interface Offering {
   tagComponent: number;
   tags: TagType[];
   tagEvidence?: TagEvidence;
+  preferenceEvidence?: Partial<Record<ClassPreference, number>>;
+  importedReviewCount?: number;
+  studentReviewCount?: number;
   rmpUrl?: string | null;
   overallQuality?: number | null;
   wouldTakeAgainPct?: number | null;

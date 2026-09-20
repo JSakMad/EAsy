@@ -38,7 +38,7 @@ export function ProfileForm({ initial, editing }: { initial: StudentProfile; edi
       <div className="preference-options">
         {CLASS_PREFERENCES.map(preference => <label key={preference.id} className="preference-option">
           <input type="checkbox" name="preferences" value={preference.id} defaultChecked={initial.preferences?.includes(preference.id) ?? false} />
-          <span>{preference.label}{preference.tags.length === 0 && <small>Saved for later. Class-format data isn't available yet.</small>}</span>
+          <span>{preference.label}{preference.tags.length === 0 && <small>Matches use online-class reports from EAsy students.</small>}</span>
         </label>)}
       </div>
       {state.errors?.preferences && <p className="auth-error">{state.errors.preferences}</p>}

@@ -20,14 +20,16 @@ export type TagEvidence = Partial<Record<TagType, number>>;
 export const PERSONAL_SCORE_WEIGHT = 0.3;
 
 export function calculatePersonalScore(
-  offering: { score: number | null; reviewCount: number; tagEvidence?: TagEvidence },
+  offering: { score: number | null; reviewCount: number; tagEvidence?: TagEvidence; preferenceEvidence?: Partial<Record<ClassPreference, number>> },
   preferences: readonly ClassPreference[],
 ) {
   const selected = CLASS_PREFERENCES.filter(p => preferences.includes(p.id));
-  const supported = selected.filter(p => p.tags.length > 0);
+  const supported = selected;
   const matches = supported.flatMap(preference => {
     // Related tags may describe the same reviews, so use the largest count rather than adding them.
-    const mentions = Math.max(0, ...preference.tags.map(tag => {
+    const studentCount = offering.preferenceEvidence?.[preference.id];
+    const studentMentions = typeof studentCount === 'number' && Number.isFinite(studentCount) ? Math.min(offering.reviewCount, Math.max(0, studentCount)) : 0;
+    const mentions = Math.max(studentMentions, 0, ...preference.tags.map(tag => {
       const count = offering.tagEvidence?.[tag];
       return typeof count === 'number' && Number.isFinite(count) ? Math.min(offering.reviewCount, Math.max(0, count)) : 0;
     }));
@@ -43,7 +45,7 @@ export function calculatePersonalScore(
     bonus: score === null || base === null ? 0 : score - base,
     matches,
     unknown: supported.filter(p => !matches.some(m => m.id === p.id)).map(p => p.label),
-    unavailable: selected.filter(p => p.tags.length === 0).map(p => p.label),
+    unavailable: [] as string[],
     coverage,
   };
 }

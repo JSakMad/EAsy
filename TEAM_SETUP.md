@@ -1,5 +1,7 @@
 # Teammate setup
 
+Course catalog and student reviews require migration `010_catalog_student_reviews.sql` and `npm run catalog:import` against your shared API/web database. Deploy the API and website together. See [course-review setup](docs/COURSE_REVIEWS.md).
+
 Personal scoring requires migration `009_class_preferences.sql`. Pull the latest code, install dependencies, and run `npm run db:migrate` against the same database configured in `apps/web/.env.local`. See [personal scoring](docs/PERSONAL_SCORING.md).
 
 Account support added **2026-09-19**: follow [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) for Google OAuth credentials, web database settings, migration 007, and verification. Frontend-only browsing still works without account configuration. See [docs/CHANGELOG.md](docs/CHANGELOG.md) for dated changes.

@@ -5,7 +5,8 @@ import { ArrowLeft, ArrowUpRight, BarChart3, BookOpenCheck, Info, MessagesSquare
 import { getOffering, getOverview } from "@/lib/api";
 import {AiOverview} from '@/components/ai-overview';
 import { SiteHeader } from "@/components/site-header";
-import { TAG_LABELS, calculatePersonalScore } from '@easy-a/core';
+import { TAG_LABELS, CLASS_PREFERENCES, calculatePersonalScore } from '@easy-a/core';
+import { getCatalogCourse } from '@/lib/catalog';
 import { PersonalScoreNote } from '@/components/personal-score-note';
 import { checkStudentSetup } from "@/lib/profile-access";
 
@@ -26,6 +27,7 @@ export default async function OfferingPage({ params }: { params: Promise<{ id: s
   const { id } = await params;
   const [{data:offering,demo},overview]=await Promise.all([getOffering(id),getOverview(id)]);
   if (!offering) notFound();
+  const catalogCourse = getCatalogCourse(offering.courseCode);
   const personal = profile&&!demo ? calculatePersonalScore(offering,profile.preferences??[]) : null;
   const displayScore = personal ? personal.score : offering.score;
   const scored = displayScore !== null;
@@ -38,6 +40,9 @@ export default async function OfferingPage({ params }: { params: Promise<{ id: s
       </div>
     </div></section>
     <section className="shell detail-body">
+      {catalogCourse && <div className="personal-ranking-note"><Link href={`/catalog/${encodeURIComponent(catalogCourse.code)}`}>Read EAsy student reviews or review this class →</Link>
+        {Boolean(offering.studentReviewCount) && <p>This score combines {offering.studentReviewCount} EAsy student reviews and {offering.importedReviewCount ?? 0} imported reviews. AI overviews summarize imported reviews only.</p>}
+      </div>}
       <AiOverview data={overview} demo={demo} offeringId={id}/>
       <div className="breakdown-panel"><div className="panel-heading"><div><p>Why this score</p><h2>The full breakdown</h2></div><BarChart3 size={24} /></div>
         <ComponentBar label="Reported A or A−" value={offering.gradeAPct ?? 0} points={offering.gradeComponent} max={50} color="gold" note={`${offering.gradeResponseCount} grade reports`} />
@@ -48,9 +53,10 @@ export default async function OfferingPage({ params }: { params: Promise<{ id: s
       <aside className="detail-aside">
         <div className="evidence-card"><MessagesSquare size={22} /><strong>{offering.reviewCount} student reviews</strong><p>{offering.reviewCount >= 25 ? "This score has a stronger sample than most." : "This is a limited sample. Use the score with extra caution."}</p></div>
         <div className="tag-card"><p>What students reported</p><div>{offering.tags.map((tag) => <span key={tag}>{TAG_LABELS[tag]}</span>)}</div></div>
+        {CLASS_PREFERENCES.some(tag=>tag.tags.length!==1&&(offering.preferenceEvidence?.[tag.id]??0)>0) && <div className="tag-card"><p>Also reported by EAsy students</p><div>{CLASS_PREFERENCES.filter(tag=>tag.tags.length!==1&&(offering.preferenceEvidence?.[tag.id]??0)>0).map(tag=><span key={tag.id}>{tag.label}</span>)}</div></div>}
         {offering.rmpUrl && <a href={offering.rmpUrl} target="_blank" rel="noreferrer" className="rmp-link">View original source on RMP <ArrowUpRight size={17} /></a>}
       </aside>
-      <div className="method-note"><Info size={19} /><p><strong>Methodology v1</strong> combines self-reported A/A− outcomes (50%), inverted difficulty (35%), and distinct class-structure signals (15%). Missing grades are excluded from the grade denominator. The weights will evolve as the dataset grows. {personal&&<> Your personal score adds up to 30% of the remaining distance to 100 for supported preferences. Each preference reaches full evidence weight at three review mentions. Preferences without available class-format data are excluded. This is a preference ranking, not a predicted grade.</>}</p></div>
+      <div className="method-note"><Info size={19} /><p><strong>Methodology v1</strong> combines self-reported A/A− outcomes (50%), inverted difficulty (35%), and distinct class-structure signals (15%). Missing grades are excluded from the grade denominator. The weights will evolve as the dataset grows. {personal&&<> Your personal score adds up to 30% of the remaining distance to 100 for supported preferences. Each preference reaches full evidence weight at three review mentions. Online-class matches require explicit student reports. This is a preference ranking, not a predicted grade.</>}</p></div>
     </section>
   </main>;
 }
