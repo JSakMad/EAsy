@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { Pool } from 'pg';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { getSyllabusSupport, reserveSyllabusAttempt, saveSyllabusCheck, syllabusReview } from '../lib/syllabus-store';
 import { getCatalogCourse } from '../lib/catalog';
 import { getCourseReviews, saveStudentReview } from '../lib/student-reviews';
 import { calculatePersonalScore } from '@easy-a/core';
@@ -97,6 +98,22 @@ describe.skipIf(!url)('catalog review persistence and professor scoring',()=>{
   it('rolls back new professor and course writes if author validation fails',async()=>{
     await expect(saveStudentReview(randomUUID(),course,{...input,professorName:'Should Roll Back'})).rejects.toThrow();
     expect((await pool.query("SELECT id FROM professors WHERE name='Should Roll Back'")).rowCount).toBe(0);
+  });
+  it('stores syllabus evidence only for the owned review and replaces previous checks',async()=>{
+    const own=await syllabusReview(users[0]!,offeringId);
+    await expect(syllabusReview(randomUUID(),offeringId)).rejects.toThrow('Leave a review');
+    await expect(syllabusReview(users[0]!,randomUUID())).rejects.toThrow('Leave a review');
+    await expect(syllabusReview(users[0]!,'demo-1')).rejects.toThrow('real professor');
+    await saveSyllabusCheck(own.reviewId,'a'.repeat(64),{preferences:['online_quizzes'],tags:['online_quizzes']});
+    expect((await getSyllabusSupport(offeringId)).tags).toEqual(['online_quizzes']);
+    expect((await getSyllabusSupport(randomUUID())).tags).toEqual([]);
+    await pool.query("UPDATE syllabus_verifications SET checked_at=now()-interval '181 days' WHERE review_id=$1",[own.reviewId]);
+    expect((await getSyllabusSupport(offeringId)).tags).toEqual([]);
+    await saveSyllabusCheck(own.reviewId,'b'.repeat(64),{preferences:[],tags:[]});
+    expect((await getSyllabusSupport(offeringId)).tags).toEqual([]);
+    for(let i=0;i<10;i++)await reserveSyllabusAttempt(users[0]!);
+    await expect(reserveSyllabusAttempt(users[0]!)).rejects.toThrow('10 syllabuses');
+    expect((await pool.query('SELECT count(*)::int AS n FROM syllabus_upload_attempts WHERE user_id=$1',[users[0]])).rows[0].n).toBe(10);
   });
   it('limits repeated submissions per authenticated user',async()=>{
     for(let i=0;i<9;i++) await saveStudentReview(users[0]!,course,{...input,professorName:'Rate Test Professor '+i});

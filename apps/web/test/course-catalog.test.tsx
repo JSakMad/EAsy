@@ -24,7 +24,7 @@ describe('course catalog ordering',()=>{
     render(<BrowseExperience courses={courses} demo={false}/>);
     fireEvent.change(screen.getByRole('textbox',{name:'Search by course code, name, or professor'}),{target:{value:'MATH'}});
     expect(cardNames()).toEqual(['MATH 0230','MATH 0220']);
-    fireEvent.change(screen.getByRole('textbox'),{target:{value:''}});
+    fireEvent.change(screen.getByRole('textbox',{name:'Search by course code, name, or professor'}),{target:{value:''}});
     fireEvent.change(screen.getByRole('combobox'),{target:{value:'MATH'}});
     expect(cardNames()).toEqual(['MATH 0230','MATH 0220']);
   });
