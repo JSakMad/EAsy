@@ -1,12 +1,10 @@
 # Accounts and Google sign-in
 
-Last updated: 2026-09-19.
-
 EAsy uses the open-source Better Auth library with Google OAuth / OpenID Connect and the existing PostgreSQL database. No paid authentication service or subscription is required for this implementation. Database and hosting usage still count toward your hosting plan. Google is the only enabled provider; email/password registration is disabled.
 
 ## User experience
 
-- Students now review class-preference checkboxes during setup. Apply migration `009_class_preferences.sql` as well. Personal scores replace the displayed review-based score for signed-in students; see [personal scoring](PERSONAL_SCORING.md) for the formula and data limitations.
+- Students review class-preference checkboxes during setup. Apply migration `009_class_preferences.sql` as well. Personal scores replace the displayed review-based score for signed-in students; see [personal scoring](PERSONAL_SCORING.md) for the formula and data limitations.
 
 - After Google sign-in, new and existing users without a student profile must confirm their name and enter their year of schooling and major at `/account/setup`. Signed-in account, course browsing, and offering pages enforce this on the server. Anonymous browsing remains public.
 - `/account` shows the saved details and links to **Edit profile**. The name starts with the Google-provided value but must be submitted with the other required fields. Students may enter **Undeclared** as their major.
@@ -42,7 +40,7 @@ Generate a secret with `node -e "console.log(require('node:crypto').randomBytes(
 
 ## Deployment
 
-The Next.js server now needs a database connection in addition to the Express API. On Vercel, set `DATABASE_URL`, `DATABASE_SSL=true`, `BETTER_AUTH_URL=https://YOUR-STABLE-WEB-DOMAIN`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` as server environment variables. Keep `NEXT_PUBLIC_API_URL` pointing to Render. The PostgreSQL connection validates TLS certificates; use your provider's verified TLS connection settings.
+The Next.js server needs a database connection in addition to the Express API. On Vercel, set `DATABASE_URL`, `DATABASE_SSL=true`, `BETTER_AUTH_URL=https://YOUR-STABLE-WEB-DOMAIN`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` as server environment variables. Keep `NEXT_PUBLIC_API_URL` pointing to Render. The PostgreSQL connection validates TLS certificates; use your provider's verified TLS connection settings.
 
 Apply migration 007 securely before enabling sign-in, then restart/redeploy the web app. The web database role needs SELECT/INSERT/UPDATE/DELETE on the five `auth_*` tables and no raw review privileges. A database owner can run the migration; a separate restricted web role is recommended. All auth table access is revoked from PostgreSQL PUBLIC. Use a provider connection pool URL for serverless deployment and account for up to five connections per warm web instance.
 

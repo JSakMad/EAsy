@@ -1,35 +1,32 @@
-# Legal and data-source notes
+# Data handling and provenance
 
-## Account data (added 2026-09-19)
+EAsy uses a pre-collected course-review dataset and a bundled course catalog. Historical review coverage is not an official schedule and does not prove that a class or instructor pairing is currently offered. Student-submitted EAsy reviews are stored separately from imported records.
 
-Google sign-in stores a user's basic profile, provider identity, encrypted OAuth tokens, and session/device metadata in private PostgreSQL auth tables. Account data is not included in public course API responses. Backups now also contain account information. Before public launch, publish an accurate privacy notice and deletion contact and establish retention/backup deletion procedures. See [AUTHENTICATION.md](AUTHENTICATION.md) for stored fields and operator deletion/revocation behavior.
+Before publishing or redistributing a dataset, confirm that its license and source terms allow the intended use. Keep a private record of the dataset source, license or permission, and any required attribution. Do not claim that a third party collected the data unless that provenance is documented.
 
-This is an engineering safeguard summary, not legal advice.
+This document is an engineering summary, not legal advice.
 
-## Current source risk
+## Public and private data
 
-Rate My Professors' current Terms of Use say users may not use automated tools to scrape or crawl the site without prior permission. They also restrict collecting and reproducing posted material. Read the primary source before every production enablement: [Rate My Professors Terms of Use](https://www.ratemyprofessors.com/terms-of-use).
+Public course endpoints expose aggregate scores, counts, tags, catalog details, and summary metadata. They do not return raw imported comments, source identifiers, staging data, quarantine records, student account data, or uploaded files.
 
-The public site identifies the University of Pittsburgh as legacy school ID `1247`: [Pitt on Rate My Professors](https://www.ratemyprofessors.com/school/1247).
+Private PostgreSQL tables use restricted privileges and row-level security where applicable. Database owners and privileged server connections still have access, so database credentials must remain secret and backups must be protected.
 
-The ingestion adapter uses the site's observed GraphQL endpoint and Relay IDs; this is not a supported or licensed public API. The integration can change or stop at any time.
+## Accounts
 
-## Safeguards implemented
+Google sign-in stores a user's basic profile, provider identity, encrypted provider tokens, and session/device metadata in private auth tables. Account data is excluded from public course responses. Publish an accurate privacy notice and deletion contact before public launch, and establish procedures for account deletion, token revocation, retention, and backup deletion.
 
-- fresh installations disable ingestion unless `RMP_INGESTION_ENABLED=true` and `RMP_TERMS_REVIEWED=true` are supplied;
-- the default delay is 5,000 ms (configuration floor 2,500 ms), and requests are serial;
-- the User-Agent identifies EAsy and its personal research purpose; it sends no contact email or account cookies;
-- per-run and UTC-day request caps, locks, cooldowns, completed checkpoints, and partial pages persist in PostgreSQL;
-- 429 stops without retry for at least 24 hours or a longer Retry-After; access denials/challenges block imports pending review;
-- v1 is hard-scoped to school ID `1247`;
-- raw comments are selected by no public API query; positive response allowlists exclude them even if internal query results gain private fields;
-- raw reviews, staging, and quarantine have row-level security enabled and public/client-role privileges revoked; privileged database owners still have access;
-- private backups are available, but neither raw storage nor dump files are encrypted by the application;
-- public detail pages link to RMP for attribution; and
-- `IngestionSource` allows a licensed export, manual collection, or student submission source to replace RMP without changing scoring or API code.
+## AI processing
 
-## Recommended production decision
+Review summaries send a bounded, redacted sample of comments to Groq. Syllabus verification sends redacted extracted document text and selected claims. Uploaded syllabus files are not publicly served and are discarded after processing; the application retains only the fingerprint and verification result described in [syllabus verification](SYLLABUS_VERIFICATION.md).
 
-Keeping reviews private or displaying only derived statistics does not grant ownership, a license, or an exemption from the source's terms. Noncommercial use and other people's scraping are not guarantees of permission. Rate limits cannot guarantee that an account or IP will not be blocked. Seek permission or advice appropriate to your intended use. Do not expose the database service key or `ADMIN_API_KEY` in the browser.
+Redaction reduces obvious contact details but is not complete anonymization. Configure the provider's data controls for the project and disclose the transfer in the product privacy notice.
 
-The local operator has chosen to enable ingestion. See [SCRAPER_SETUP.md](SCRAPER_SETUP.md) for the exact operating limits, access controls, unresolved-course handling, backups, and coverage limitations. RMP reviews are not Pitt's authoritative current course schedule.
+## Operational safeguards
+
+- Keep `.env`, database exports, uploaded files, and raw review data out of Git.
+- Use server-only environment variables for database, OAuth, Groq, and administrative credentials.
+- Apply least-privilege database grants and encrypted transport in hosted environments.
+- Restrict backups, test restores in an isolated database, and define a retention schedule.
+- Treat AI summaries and syllabus checks as assistive signals rather than guarantees.
+- Keep the public methodology honest about sample sizes, missing data, and historical coverage.

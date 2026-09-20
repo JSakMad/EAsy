@@ -1,6 +1,6 @@
 # Syllabus-supported review tags
 
-Pitt professor/course pages accept PDF, Word (.docx and legacy .doc), and UTF-8 .txt syllabuses from signed-in students who reviewed that exact pairing. LSU previews do not accept uploads.
+Pitt professor/course pages accept PDF, Word (.docx and .doc), and UTF-8 .txt syllabuses from signed-in students who reviewed that exact pairing. LSU previews do not accept uploads.
 
 ## Extraction and AI checks
 
@@ -17,8 +17,6 @@ There is one provider request per attempt, a 25-second timeout, a 4,096-token ou
 Check marks mean supported by a matching uploaded syllabus, not official institutional verification or authentication. Neither AI nor document parsing proves that a file is genuine. Grades and difficulty are not verified. Semester policies can vary; checks expire after 180 days.
 
 Only the document SHA-256 fingerprint, supported IDs, check time, checker version, and review relation are retained by EAsy. The file and text are discarded; they are not publicly served. Groq processes the submitted redacted text under its service policies. The upload UI discloses this transfer. Reuploading a matching document replaces that review's checks, including clearing checks if no claims are supported. Review/user deletion cascades to the evidence. Scores are unchanged.
-
-Checker version 2 denotes Groq-based checks. Version 1 rule-based records are preserved in the database but no longer display check marks; students can reupload to run the AI check.
 
 ## Deployment
 

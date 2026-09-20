@@ -32,6 +32,6 @@ These are historical reports for a professor/course pairing, not verified curren
 
 Run `npm run db:migrate` (or `npm.cmd run db:migrate` in Windows PowerShell). Migration `009_class_preferences.sql` adds a constrained `text[]` column to `auth_student_profile`. `NULL` means the student has not reviewed the questions; `[]` is an explicit no-preference choice. The migration preserves accounts, existing profile details, and all course records. The existing web role's permissions on the profile table cover the new column.
 
-Deploy the API and web changes together: scoring requires the new public `tagEvidence` field. Older API responses without that field receive no preference boost.
+Deploy the API and web workspaces together: scoring requires the public `tagEvidence` field. Responses without that field receive no preference boost.
 
 Implementation: `packages/core/src/personal-score.ts`, `apps/web/lib/profile-fields.ts`, and `apps/api/src/repository.ts`. Regression tests cover ranking changes, numeric PostgreSQL values, limited evidence, unknown delivery mode, overlapping tags, persistence, validation, and anonymous behavior.

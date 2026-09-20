@@ -1,6 +1,6 @@
 # EAsy: on-demand Groq summaries
 
-The website now uses Groq's `qwen/qwen3.8-27b` model instead of Ollama. The server loads `GROQ_API_KEY` from `.env`; the key is never included in browser code, model request bodies, logs, or public API responses. The actual `.env` was not displayed or edited during this update.
+The website uses Groq's `qwen/qwen3.8-27b` model. The server loads `GROQ_API_KEY` from `.env`; the key is never included in browser code, model request bodies, logs, or public API responses.
 
 ## Run it
 
@@ -12,7 +12,7 @@ npm run db:migrate
 npm run dev
 ```
 
-Open http://localhost:3000 and select a professor for a course. A missing or expired overview loads automatically while the page remains usable. No Ollama or manual generation command is needed. Restart an already-running API after changing `.env`.
+Open http://localhost:3000 and select a professor for a course. A missing or expired overview loads automatically while the page remains usable. Restart an already-running API after changing `.env`.
 
 On another installation, place `GROQ_API_KEY=your_private_key` in the actual `.env` or API host's secret environment settings. Never put it in `.env.example`, Git, chat, or `NEXT_PUBLIC_*` variables.
 
@@ -25,7 +25,7 @@ On another installation, place `GROQ_API_KEY=your_private_key` in the actual `.e
 - A PostgreSQL lock prevents overlapping provider calls across processes. Budgets and failure cooldowns persist across restarts. At least three usable reviews are required; demo pages never call Groq.
 - The browser makes at most three generation-endpoint requests per mount for busy/short-cooldown states. Provider failures do not cause retry loops; revisit later to retry.
 
-Migration 006 adds `offering_cloud_overviews` and `overview_api_budget`. Cached metadata includes sample IDs/dates, generation time, model/version, and cooldowns, but does not duplicate review text. Both tables have RLS enabled and public/anonymous access revoked. The old local cache is preserved separately, not presented as a new Groq result.
+Migration 006 adds `offering_cloud_overviews` and `overview_api_budget`. Cached metadata includes sample IDs, evidence timestamps, generation time, model/version, and cooldowns, but does not duplicate review text. Both tables have RLS enabled and public/anonymous access revoked.
 
 ## Review sampling and summary quality
 
@@ -72,8 +72,8 @@ npm run build
 Normal tests use synthetic keys and mocked requests. For PostgreSQL integration tests, migrate and use only the dedicated test database:
 
 ```bash
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/easy_ingestion_test npm run db:migrate
-EASY_INTEGRATION_TEST=true DATABASE_URL=postgresql://postgres:postgres@localhost:5432/easy_ingestion_test npm test
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/easy_integration_test npm run db:migrate
+EASY_INTEGRATION_TEST=true DATABASE_URL=postgresql://postgres:postgres@localhost:5432/easy_integration_test npm test
 ```
 
-Integration tests refuse databases whose names do not end in `_test`. The optional old local CLI is documented in [legacy instructions](AI_OVERVIEWS_LOCAL_LEGACY.md); it no longer populates the website cache.
+Integration tests refuse databases whose names do not end in `_test`.
