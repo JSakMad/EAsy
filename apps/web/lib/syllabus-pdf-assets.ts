@@ -5,7 +5,9 @@ import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const requireFromHere = createRequire(import.meta.url);
-const pdfAssetsRoot = dirname(requireFromHere.resolve('pdfjs-dist/package.json'));
+// Keep Node's filesystem resolution at runtime: Turbopack otherwise replaces
+// require.resolve with a numeric module ID in production builds.
+const pdfAssetsRoot = dirname(requireFromHere.resolve(/* turbopackIgnore: true */ 'pdfjs-dist/package.json'));
 const directories = { standardFontDataUrl: 'standard_fonts', cMapUrl: 'cmaps' } as const;
 
 // unpdf's serverless PDF.js build may use a browser-style fetch implementation.

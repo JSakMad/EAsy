@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "vitest run",
+    "test:syllabus-build": "node scripts/check-syllabus-build.cjs",
     "dev": "next dev",
     "prebuild": "npm run build -w @easy-a/core",
     "build": "next build",
