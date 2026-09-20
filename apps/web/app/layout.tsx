@@ -13,7 +13,7 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-displ
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
-  title: { default: "EAsy — Your course. Your best fit.", template: "%s · EAsy" },
+  title: { default: "EAsy", template: "%s · EAsy" },
   description: "Find your Pitt course, then compare professors by reported grades, difficulty, and class structure.",
   openGraph: {
     title: "EAsy — Pitt course comparisons",

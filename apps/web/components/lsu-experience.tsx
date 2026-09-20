@@ -16,7 +16,7 @@ export function LsuExperience() {
   return <main>
     <div className="shell"><SiteHeader school="lsu" /></div>
     <section className="hero easy-hero"><div className="shell hero-grid">
-      <div className="hero-copy"><p className="eyebrow">Louisiana State University / demo edition</p><h1>A new campus.<br/><em>The same idea.</em></h1><p>A little clarity before registration. Explore a sample class and professor to see how EAsy could work at LSU.</p><a href="#lsu-courses" className="hero-cta">Explore the sample class <ArrowUpRight size={18}/></a></div>
+      <div className="hero-copy"><p className="eyebrow">Louisiana State University / demo edition</p><h1>EAsy<br/><em>The same idea.</em></h1><p>A little clarity before registration. Explore a sample class and professor to see how EAsy could work at LSU.</p><a href="#lsu-courses" className="hero-cta">Explore the sample class <ArrowUpRight size={18}/></a></div>
       <aside className="field-notes"><div className="note-caption"><span>Campus notes</span><span>LSU</span></div><h2>One class. A proof of concept.</h2><p>This is a separate demonstration. The course, professor, scores, and review counts are fictional.</p><p className="note-foot">No LSU reviews are collected here. Switch back to Pitt for the live course guide.</p><span className="note-scribble">Room for another campus.</span></aside>
     </div></section>
     <section id="lsu-courses" className="shell course-finder"><label className="course-search"><span>Search the LSU demo</span><div><Search size={20}/><input value={query} onChange={event => {setQuery(event.target.value);setPage(0);}} aria-label="Search LSU courses or professors" placeholder="Try DEMO 101 or Avery Rowan"/></div></label>

@@ -23,7 +23,7 @@ export function CourseNotebook({courses,page,onPageChange,onChoose,courseHref,de
     <div className="notebook-binding" aria-hidden="true">{Array.from({length:8},(_,i)=><i key={i}/>)}</div>
     <button className="notebook-turn notebook-turn-prev" aria-label="Previous notebook page" aria-controls="notebook-courses" disabled={current===0} onClick={()=>turn(current-1)}><ArrowLeft size={18}/><span>Back</span></button>
     <div className="notebook-paper">
-      <div className="notebook-caption"><span>Semester notes / course index</span><span aria-hidden="true">EAsy.</span></div>
+      <div className="notebook-caption"><span>Semester notes / course index</span><span aria-hidden="true">EAsy</span></div>
       <div id="notebook-courses" className="notebook-sheet" key={`${current}-${courses.length}`} data-direction={direction}>
         {courses.length ? <div className="notebook-entries">{entries.map((course,i)=>{const content=<>
           <span className="notebook-entry-number" aria-hidden="true">{String(start+i+1).padStart(2,'0')}</span>

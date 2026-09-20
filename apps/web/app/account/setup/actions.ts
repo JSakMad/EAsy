@@ -16,5 +16,5 @@ export async function saveProfile(_previous: ProfileFormState, form: FormData): 
     return { message: "We couldn't save your profile. Please try again." };
   }
   revalidatePath("/", "layout");
-  redirect("/account");
+  redirect("/");
 }

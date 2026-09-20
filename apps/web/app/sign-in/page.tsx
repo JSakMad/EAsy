@@ -22,7 +22,7 @@ export default async function SignInPage({ searchParams }: {
     <main className="auth-main">
       <section className="auth-card" aria-labelledby="sign-in-title">
         <p className="section-kicker">Your EAsy account</p>
-        <h1 id="sign-in-title">Welcome to EAsy.</h1>
+        <h1 id="sign-in-title">Welcome to EAsy</h1>
         <p>Sign in with Google to access your account. New here? Your first sign-in creates an account automatically.</p>
         <GoogleSignIn enabled={available} failed={Boolean(params.error)} />
         <p className="auth-note">We use your Google name, email, and profile picture to create your account.</p>

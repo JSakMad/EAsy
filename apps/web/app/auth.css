@@ -10,7 +10,7 @@
 .auth-button:focus-visible, .account-nav:focus-visible, .auth-back:focus-visible { outline: 3px solid #2d69c8; outline-offset: 4px; }
 .auth-card .auth-error { color: #a62121; }
 .auth-note { font-size: 13px; }
-.auth-back { display: inline-block; margin-top: 16px; text-decoration: underline; font-size: 14px; }
+.auth-back { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 20px; margin-top: 16px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); color: var(--navy); font: inherit; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
 .account-details { margin: 28px 0; overflow-wrap: anywhere; }
 .account-details dt { font-size: 12px; color: var(--muted); margin-top: 18px; }
 .account-details dd { margin: 5px 0 0; }
