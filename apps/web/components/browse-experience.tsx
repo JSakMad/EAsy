@@ -2,7 +2,7 @@
 
 import {useEffect,useMemo,useRef,useState} from 'react';
 import Link from 'next/link';
-import {ArrowLeft,ArrowRight,ArrowUpRight,Info,Search,SlidersHorizontal,Sparkles,Users} from 'lucide-react';
+import {ArrowLeft,ArrowRight,ArrowUpRight,Search,SlidersHorizontal,Users} from 'lucide-react';
 import {TAG_LABELS,TAG_GROUPS,normalizeCourseCode,type TagType} from '@easy-a/core';
 import type {Course,Offering} from '@/lib/types';
 import {demoOfferings} from '@/lib/demo-data';
@@ -73,33 +73,33 @@ export function BrowseExperience({courses,demo,initialCode,preferences=null}:{co
 
   return <main>
     <div className="shell"><SiteHeader/></div>
-    <section className="hero easy-hero">
-      <div className="hero-glow" aria-hidden="true"/>
+    {!selected&&<section className="hero easy-hero">
       <div className="shell hero-grid">
         <div className="hero-copy">
-          <div className="eyebrow"><Sparkles size={14}/> A smarter way to pick your professor</div>
-          <h1>Your course.<br/>Your <em>best fit.</em></h1>
-          <p>You know the class. Find the professor who makes it click—with reported grades, difficulty, and the details that matter.</p>
-          <a className="hero-cta" href="#course-finder">Find my course <ArrowRight size={17}/></a>
-          <div className="hero-steps"><span>01 Find a course</span><i/><span>02 Compare professors</span><i/><span>03 Choose your fit</span></div>
+          <p className="eyebrow">Notes for your next semester</p>
+          <h1>A little homework.<br/><em>A better fit.</em></h1>
+          <p>Same class. Different experiences. Find your course and get to know the professors before you pick one.</p>
+          <a className="hero-cta" href="#course-finder">Find your course <ArrowRight size={18}/></a>
+          <span className="hand-note">Start here. Your future self will thank you.</span>
         </div>
-        <aside className="formula-card entrance-card">
-          {personalized?<div className="personal-formula"><p className="section-kicker">YOUR PERSONAL SCORE</p><h2>Your preferences matter.</h2><p>Professor scores start with student-reported grades, difficulty, and class structure. Evidence of features you prefer adds a boost.</p><p>Repeated review mentions carry more weight. Unreported features remain unknown.</p><Link href="/account/setup">Edit your preferences</Link></div>:<><div className="formula-top"><span>Behind the EAsy score</span><span className="version">50 / 35 / 15</span></div>
-          <div className="formula-score"><span>50</span><small>%</small><b>reported A grades</b></div>
-          <div className="formula-row"><div><strong>35%</strong><span>lower difficulty</span></div><div><strong>15%</strong><span>class structure</span></div></div>
-          <div className="formula-note"><Info size={15}/> Student-reported signals, not a grade guarantee. At least 5 reviews required for a score.</div>
-        </>} </aside>
+        <aside className="field-notes" aria-label="How scores work">
+          <div className="note-caption"><span>EAsy field notes</span><span>No. 01</span></div>
+          <h2>{personalized?'Good on paper. Better for you.':'Look beyond the course code.'}</h2>
+          <dl><div><dt>01 / Grades</dt><dd>What students actually earned.</dd></div><div><dt>02 / Difficulty</dt><dd>How much work to expect.</dd></div><div><dt>03 / Class style</dt><dd>{personalized?'The details that match your preferences.':'Quizzes, exams, and the everyday details.'}</dd></div></dl>
+          <p className="note-foot">{personalized?<Link href="/account/setup">Your preferences are part of the picture. Edit them here.</Link>:'Student reports, not promises. Five reviews are needed for a score.'}</p>
+          <span className="note-scribble" aria-hidden="true">Find your kind of class.</span>
+        </aside>
       </div>
-    </section>
+    </section>}
 
     <section id="course-finder" className="finder shell course-finder">
       {demo&&<div className="demo-banner"><span>DEMO DATA</span> The API is unavailable. These fictional examples are not real professor recommendations.</div>}
       {!selected?<>
         <div className="finder-toolbar course-toolbar">
-          <label className="course-search"><span>What class do you need?</span><div><Search size={21}/><input ref={searchInput} value={query} onChange={e=>{setQuery(e.target.value);setLimit(24);}} placeholder="Course code, course name, or professor" aria-label="Search by course code, name, or professor"/></div></label>
+          <label className="course-search"><span>Search the index</span><div><Search size={21}/><input ref={searchInput} value={query} onChange={e=>{setQuery(e.target.value);setLimit(24);}} placeholder="Course code, course name, or professor" aria-label="Search by course code, name, or professor"/></div></label>
           <label className="subject-picker"><span>Subject</span><select value={subject} onChange={e=>{setSubject(e.target.value);setLimit(24);}}><option value="all">All subjects</option>{subjects.map(s=><option key={s}>{s}</option>)}</select></label>
         </div>
-        <div className="catalog-heading"><div><p className="section-kicker">Start with your class</p><h2>Find a course. Then compare.</h2></div><span aria-live="polite">{matches.length} courses</span></div>
+        <div className="catalog-heading"><div><p className="section-kicker">The course index</p><h2>What’s on your schedule?</h2></div><span aria-live="polite">{matches.length} courses</span></div>
         <p className="coverage-note">Search all supplied courses by code, name, professor, or field of study. Most-reviewed courses appear first.</p>
         <div className="course-grid">{matches.slice(0,limit).map(course=><button key={course.courseCode} className="course-card" onClick={()=>choose(course)} aria-label={`Compare professors for ${course.courseCode}`}>
           <div className="course-card-top"><SubjectIcon courseCode={course.courseCode}/><ArrowUpRight size={19}/></div>
@@ -129,7 +129,7 @@ export function BrowseExperience({courses,demo,initialCode,preferences=null}:{co
         </div>
       </>}
     </section>
-    <footer className="shell"><p>EAsy · A little more clarity before registration.</p><p>Not affiliated with Pitt or Rate My Professors.</p></footer>
+    <footer className="shell"><p>EAsy. Made for the next semester.</p><p>Not affiliated with Pitt or Rate My Professors.</p></footer>
   </main>;
 }
 

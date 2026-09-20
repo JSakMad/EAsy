@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Manrope, Space_Grotesk, Caveat } from "next/font/google";
 import "./globals.css";
 import './easy.css';
 import './overview.css';
 import './auth.css';
 import './catalog.css';
+import './notebook.css';
 
+const handwriting = Caveat({ subsets: ["latin"], variable: "--font-hand", weight: ["400", "600"] });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-body" });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" });
 
@@ -22,5 +24,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body className={`${manrope.variable} ${spaceGrotesk.variable}`}>{children}</body></html>;
+  return <html lang="en"><body className={`${manrope.variable} ${spaceGrotesk.variable} ${handwriting.variable}`}>{children}</body></html>;
 }
