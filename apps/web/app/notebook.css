@@ -152,3 +152,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,te
  .notebook-empty{min-height:504px;padding:20px 12px}.notebook-empty h3{font-size:22px}
 }
 @media(prefers-reduced-motion:reduce){.notebook-sheet{animation:none}.notebook-course,.notebook-turn{transition:none}}
+.school-lsu .notebook-course{text-decoration:none}
+.school-lsu .notebook-course:hover{background:#fdd02314}
+.school-lsu .notebook-course,.school-lsu .notebook-blank{border-bottom-color:#461d7c26}
+.school-lsu .notebook-turn:not(:disabled){border-color:#c6a11b}
+.school-lsu .notebook-turn:hover:not(:disabled){background:#ffe36a}

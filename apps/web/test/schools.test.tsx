@@ -19,6 +19,9 @@ describe('separate school experiences', () => {
   });
   it('finds the fictional course by code, title, and professor without Pitt links', () => {
     render(<LsuExperience />);
+    expect(screen.getByRole('region', { name: 'Course notebook' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Next notebook page' })).toHaveProperty('disabled', true);
+    expect(screen.getByRole('button', { name: 'Previous notebook page' })).toHaveProperty('disabled', true);
     const search = screen.getByRole('textbox', { name: 'Search LSU courses or professors' });
     for (const value of ['demo101', 'Creative Problem', 'Avery Rowan']) {
       fireEvent.change(search, { target: { value } });
