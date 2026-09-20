@@ -20,7 +20,7 @@ export function createApp(repository: Repository = defaultRepository,overviewRea
   app.get('/schools/:id/courses', async (req,res,next) => {
     try {
       const rows=await repository.courses(req.params.id!);
-      res.json({data:rows.map(r=>({courseCode:r.courseCode,courseTitle:r.courseTitle,professorCount:r.professorCount,reviewCount:r.reviewCount}))});
+      res.json({data:rows.map(r=>({courseCode:r.courseCode,courseTitle:r.courseTitle,professorNames:r.professorNames??[],professorCount:r.professorCount,reviewCount:r.reviewCount}))});
     } catch(error) {next(error);}
   });
   app.get('/courses/:code/offerings', async (req,res,next) => {

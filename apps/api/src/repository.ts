@@ -25,7 +25,7 @@ const TAG_EVIDENCE = `LEFT JOIN LATERAL (
 
 export const repository: Repository = {
   async courses(schoolId) {
-    const result = await pool.query(`SELECT c.course_code,c.course_title,c.is_catalog,count(DISTINCT p.id)::int AS professor_count,
+    const result = await pool.query(`SELECT c.course_code,c.course_title,c.is_catalog,array_agg(DISTINCT p.name) AS professor_names,count(DISTINCT p.id)::int AS professor_count,
       count(r.id)::int AS review_count FROM courses c JOIN schools sc ON sc.id=c.school_id
       JOIN professor_course_offerings o ON o.course_id=c.id JOIN professors p ON p.id=o.professor_id
       JOIN (SELECT id,offering_id FROM reviews UNION ALL SELECT id,offering_id FROM student_reviews) r ON r.offering_id=o.id

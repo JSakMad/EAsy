@@ -1,18 +1,18 @@
 # Course catalog and student reviews
 
-The `/catalog` page contains 6,114 unique course codes from the supplied `Courses 1.txt` and `Classes.txt` files. The files contained 6,251 course entries; 137 repeated codes were merged. All 190 section headings are retained as field-of-study tags. Special suffixes such as `NUR 1140IS` and `NUR 1140OS` remain distinct. `ECON 1910` has two supplied titles, both searchable; the first file's title is displayed.
+The front-page course finder contains 6,114 unique course codes from the supplied `Courses 1.txt` and `Classes.txt` files. The files contained 6,251 course entries; 137 repeated codes were merged. All 190 section headings are retained as field-of-study tags. Special suffixes such as `NUR 1140IS` and `NUR 1140OS` remain distinct. `ECON 1910` has two supplied titles, both searchable; the first file's title is displayed.
 
-`config/course-catalog.json` is the portable catalog artifact. Searching works by case-insensitive code (with or without spaces), title, alternative title, and field-of-study keywords. The field filter and 24-result pagination run on the server, so thousands of courses are not serialized into a client component. Field badges link back to filtered searches. The catalog is a supplied listing, not a statement that every course is available this semester.
+`config/course-catalog.json` is the portable catalog artifact. Searching works by case-insensitive code (with or without spaces), title, alternative title, and field-of-study keywords. The front page also searches professor names supplied by the API and progressively displays results. The supplied listing is not a current-semester schedule.
 
 ## Student flow
 
-1. Open **Course catalog**, search, and choose a course.
+1. Search the front page by code, title, professor, or field; choose a course and follow its review link. Courses without reviews invite the first submission.
 2. Sign in and complete the student profile if necessary.
 3. Choose an existing professor using the name search, or enter the full name of a professor who is not listed.
 4. Answer whether the student received an A or A−, choose difficulty from 1 to 5, select any actually observed profile-preference features, and optionally add up to 3,000 characters of comments.
-5. Submit. PostgreSQL records the submission timestamp; the public review displays its date in UTC. Client-supplied dates and author IDs are ignored.
+5. Submit. PostgreSQL records the submission timestamp; the date is retained with the review. Client-supplied dates and author IDs are ignored.
 
-Reviews and comments are public on the course page, but account names, emails, and user IDs are not displayed. Comments are rendered as plain React text, never raw HTML. Imported review comments remain private and are not included in this page. A student may submit one review per professor/course pairing and up to 10 in a rolling 24 hours. Submission checks authentication, completed profiles, catalog membership, allowed tags, and professor ownership by school on the server. Duplicate and failed requests roll back all related writes.
+Individual reviews and comments are not displayed. The review route contains only the submission form and confirmation. Comments feed the AI overview source; author names, emails, and user IDs are excluded. A student may submit one review per professor/course pairing and up to 10 per rolling 24 hours. Authentication, completed profiles, allowed tags, and school membership are checked server-side. Failed writes roll back. The old `/catalog` listing redirects to the front-page finder.
 
 ## Scoring
 
@@ -20,7 +20,7 @@ Student reviews live in a separate `student_reviews` table rather than masquerad
 
 For offerings with student reviews, the API recomputes the original score from both imported and first-party review inputs on read. Five total reviews are required. The existing import snapshots are preserved. A Yes answer contributes an A outcome and No contributes a non-A outcome. Difficulty is averaged across both sources. Class features with an exact, one-to-one existing tag mapping also contribute to the base class-structure component; broader categories are not expanded into unproven specific tags.
 
-For personalization, all 12 selected feature types are counted directly from student submissions in `preferenceEvidence`. The scorer uses the strongest available direct preference count or related tag count, rather than double counting overlapping evidence. **Online classes now affects personal scores when explicitly reported by EAsy reviewers**; online quizzes never imply online classes. Imported comments alone still cannot establish delivery mode. Student comments are not sent to the AI overview service.
+For personalization, all 12 selected feature types are counted directly from student submissions in `preferenceEvidence`. The scorer uses the strongest available direct preference count or related tag count, rather than double counting overlapping evidence. **Online classes now affects personal scores when explicitly reported by EAsy reviewers**; online quizzes never imply online classes. Imported comments alone still cannot establish delivery mode. Nonempty student comments join imported reviews in the AI overview source, with submission dates, grade answers, and difficulty. Source fingerprints invalidate outdated cached summaries.
 
 ## Database and deployment
 

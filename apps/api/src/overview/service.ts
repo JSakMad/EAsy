@@ -5,10 +5,10 @@ import {LocalSummarizer} from './ollama.js';
 
 export async function loadSource(id:string) {
   if(!/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(id))return null;
-  const info=(await pool.query(`SELECT c.course_code,p.name FROM professor_course_offerings o JOIN courses c ON c.id=o.course_id
+  const info=(await pool.query(`SELECT c.course_code,c.is_catalog,p.name FROM professor_course_offerings o JOIN courses c ON c.id=o.course_id
     JOIN professors p ON p.id=o.professor_id WHERE o.id=$1 AND NOT p.is_demo`,[id])).rows[0];
-  if(!info||!isCanonicalCourseCode(info.course_code))return null;
-  const rows=await pool.query(`SELECT rmp_review_id,raw_comment_text,date_posted,grade_received,difficulty_rating FROM reviews WHERE offering_id=$1 ORDER BY rmp_review_id`,[id]);
+  if(!info||(!info.is_catalog&&!isCanonicalCourseCode(info.course_code)))return null;
+  const rows=await pool.query(`SELECT rmp_review_id,raw_comment_text,date_posted,grade_received,difficulty_rating FROM reviews WHERE offering_id=$1 UNION ALL SELECT 'student:' || id::text AS rmp_review_id,comments AS raw_comment_text,submitted_at AS date_posted,CASE WHEN received_a THEN 'A' ELSE 'Other' END AS grade_received,difficulty AS difficulty_rating FROM student_reviews WHERE offering_id=$1 AND trim(comments)<>'' ORDER BY rmp_review_id`,[id]);
   if(!rows.rowCount)return null;
   const reviews:Review[]=rows.rows.map(r=>({id:r.rmp_review_id,text:r.raw_comment_text,date:r.date_posted?.toISOString()??null,grade:r.grade_received,difficulty:Number(r.difficulty_rating)}));
   return {reviews,hash:fingerprint(info.course_code,info.name,reviews),course:info.course_code};

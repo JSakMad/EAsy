@@ -40,8 +40,8 @@ export default async function OfferingPage({ params }: { params: Promise<{ id: s
       </div>
     </div></section>
     <section className="shell detail-body">
-      {catalogCourse && <div className="personal-ranking-note"><Link href={`/catalog/${encodeURIComponent(catalogCourse.code)}`}>Read EAsy student reviews or review this class →</Link>
-        {Boolean(offering.studentReviewCount) && <p>This score combines {offering.studentReviewCount} EAsy student reviews and {offering.importedReviewCount ?? 0} imported reviews. AI overviews summarize imported reviews only.</p>}
+      {catalogCourse && <div className="personal-ranking-note"><Link href={`/catalog/${encodeURIComponent(catalogCourse.code)}`}>Review this class →</Link>
+        {Boolean(offering.studentReviewCount) && <p>This score combines {offering.studentReviewCount} EAsy student reviews and {offering.importedReviewCount ?? 0} imported reviews. AI overviews summarize student feedback.</p>}
       </div>}
       <AiOverview data={overview} demo={demo} offeringId={id}/>
       <div className="breakdown-panel"><div className="panel-heading"><div><p>Why this score</p><h2>The full breakdown</h2></div><BarChart3 size={24} /></div>

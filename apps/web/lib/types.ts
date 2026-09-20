@@ -1,7 +1,7 @@
 import type { TagType, TagEvidence, ClassPreference } from "@easy-a/core";
 
 export interface Department { id: string; name: string; offeringCount: number }
-export interface Course {courseCode:string;courseTitle:string|null;professorCount:number;reviewCount:number}
+export interface Course {courseCode:string;courseTitle:string|null;professorCount:number;reviewCount:number;professorNames?:string[];fieldsOfStudy?:string[];alternateTitles?:string[]}
 export interface Overview {
   status:'ready'|'pending'|'stale'|'insufficient'|'unavailable';
   totalReviews?:number;provider?:string;retryAfter?:number;reason?:string;sourceChanged?:boolean;truncatedCount?:number;

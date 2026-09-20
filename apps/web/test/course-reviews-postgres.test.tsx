@@ -7,6 +7,7 @@ import { getCatalogCourse } from '../lib/catalog';
 import { getCourseReviews, saveStudentReview } from '../lib/student-reviews';
 import { calculatePersonalScore } from '@easy-a/core';
 import { repository } from '../../api/src/repository';
+import { loadSource } from '../../api/src/overview/service';
 import { publicOffering } from '../../api/src/public-data';
 
 vi.mock('server-only',()=>({}));
@@ -82,6 +83,16 @@ describe.skipIf(!url)('catalog review persistence and professor scoring',()=>{
     expect(row?.tagEvidence.online_quizzes).toBe(6);
     expect(JSON.stringify(row)).not.toContain('PRIVATE_IMPORTED_COMMENT');
     expect((await getCourseReviews(course.code)).summary.total).toBe(5);
+  });
+  it('supplies professor search names and private student evidence to AI overviews',async()=>{
+    const courseRow=(await repository.courses('1247')).find(c=>c.courseCode===course.code);
+    expect(courseRow.professorNames).toContain(input.professorName);
+    const source=await loadSource(offeringId);
+    expect(source?.reviews).toHaveLength(6);
+    expect(source?.reviews.filter(r=>r.id.startsWith('student:'))).toHaveLength(5);
+    expect(JSON.stringify(source)).not.toContain('@example.test');
+    await pool.query('UPDATE student_reviews SET comments=$1 WHERE user_id=$2 AND offering_id=$3',['Changed class experience.',users[0],offeringId]);
+    expect((await loadSource(offeringId))?.hash).not.toBe(source?.hash);
   });
   it('rolls back new professor and course writes if author validation fails',async()=>{
     await expect(saveStudentReview(randomUUID(),course,{...input,professorName:'Should Roll Back'})).rejects.toThrow();

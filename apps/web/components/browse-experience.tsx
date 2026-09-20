@@ -30,7 +30,7 @@ export function BrowseExperience({courses,demo,initialCode,preferences=null}:{co
   const searchInput=useRef<HTMLInputElement>(null);
   const subjects=useMemo(()=>[...new Set(courses.map(c=>c.courseCode.split(' ')[0]))].sort(),[courses]);
   const matches=useMemo(()=>courses.filter(c=>(subject==='all'||c.courseCode.split(' ')[0]===subject)&&
-    (!query.trim()||compact(c.courseCode).includes(compact(query))||c.courseCode===normalizeCourseCode(query,{})||(c.courseTitle??'').toLowerCase().includes(query.trim().toLowerCase())))
+    (!query.trim()||compact(c.courseCode).includes(compact(query))||c.courseCode===normalizeCourseCode(query,{})||[c.courseTitle,...(c.professorNames??[]),...(c.fieldsOfStudy??[]),...(c.alternateTitles??[])].filter(Boolean).join(' ').toLowerCase().includes(query.trim().toLowerCase())))
     .sort((a,b)=>b.reviewCount-a.reviewCount||a.courseCode.localeCompare(b.courseCode)),[courses,query,subject]);
 
   useEffect(()=>{
@@ -93,22 +93,21 @@ export function BrowseExperience({courses,demo,initialCode,preferences=null}:{co
     </section>
 
     <section id="course-finder" className="finder shell course-finder">
-      <p className="personal-ranking-note">Want to review a class or find one that is not listed here? <Link href="/catalog">Search the full course catalog and add a review.</Link></p>
       {demo&&<div className="demo-banner"><span>DEMO DATA</span> The API is unavailable. These fictional examples are not real professor recommendations.</div>}
       {!selected?<>
         <div className="finder-toolbar course-toolbar">
-          <label className="course-search"><span>What class do you need?</span><div><Search size={21}/><input ref={searchInput} value={query} onChange={e=>{setQuery(e.target.value);setLimit(24);}} placeholder="Try CS 1530 or NROSCI0080" aria-label="Search by course code or title"/></div></label>
+          <label className="course-search"><span>What class do you need?</span><div><Search size={21}/><input ref={searchInput} value={query} onChange={e=>{setQuery(e.target.value);setLimit(24);}} placeholder="Course code, course name, or professor" aria-label="Search by course code, name, or professor"/></div></label>
           <label className="subject-picker"><span>Subject</span><select value={subject} onChange={e=>{setSubject(e.target.value);setLimit(24);}}><option value="all">All subjects</option>{subjects.map(s=><option key={s}>{s}</option>)}</select></label>
         </div>
-        <div className="catalog-heading"><div><p className="section-kicker">Start with your class</p><h2>Find a course. Then compare.</h2></div><span aria-live="polite">{matches.length} courses with reviews</span></div>
-        <p className="coverage-note">Most-reviewed courses first, counting reviews across all professors. Historical Pitt review data—not enrollment counts or a current-semester schedule.</p>
+        <div className="catalog-heading"><div><p className="section-kicker">Start with your class</p><h2>Find a course. Then compare.</h2></div><span aria-live="polite">{matches.length} courses</span></div>
+        <p className="coverage-note">Search all supplied courses by code, name, professor, or field of study. Most-reviewed courses appear first.</p>
         <div className="course-grid">{matches.slice(0,limit).map(course=><button key={course.courseCode} className="course-card" onClick={()=>choose(course)} aria-label={`Compare professors for ${course.courseCode}`}>
           <div className="course-card-top"><SubjectIcon courseCode={course.courseCode}/><ArrowUpRight size={19}/></div>
           <h3>{course.courseCode}</h3><p>{course.courseTitle||'Pitt course · student-reported data'}</p>
           <div className="course-card-bottom"><span><Users size={14}/>{course.professorCount} professor{course.professorCount===1?'':'s'}</span><span>{course.reviewCount} reviews</span></div>
         </button>)}</div>
         {matches.length>limit&&<button className="load-more" onClick={()=>setLimit(n=>n+24)}>Show more courses <ArrowRight size={16}/></button>}
-        {matches.length===0&&<div className="empty-state"><Search size={28}/><h3>{courses.length?'No matching course yet':'Your course library is ready'}</h3><p>{courses.length?'Try the subject and number without spaces, or choose All subjects. A missing course may not have been imported yet.':'Import review data to start comparing professors. No fictional scores are mixed into your live data.'}</p></div>}
+        {matches.length===0&&<div className="empty-state"><Search size={28}/><h3>This course does not exist in our course data</h3><p>Check the course code, name, or professor, or choose All subjects.</p></div>}
       </>:<>
         <div className="comparison-top"><button onClick={back} className="back-button"><ArrowLeft size={16}/> All courses</button><span>Same course. Different professors.</span></div>
         <div className="content-grid comparison-grid">
@@ -118,12 +117,13 @@ export function BrowseExperience({courses,demo,initialCode,preferences=null}:{co
           <div className="results" aria-busy={loading}>
             <div className="results-head"><div><p>Compare professors for</p><h2 ref={resultsHeading} tabIndex={-1}>{selected.courseCode}</h2></div><label className="sort-field">Sort by <select aria-label="Sort professors" value={sort} onChange={e=>setSort(e.target.value as SortKey)}><option value="score">{personalized?"Highest personal score":"Highest EAsy score"}</option><option value="difficulty">Lowest difficulty</option><option value="reviews">Most reviews</option></select></label></div>
             {selected.courseTitle&&<p>{selected.courseTitle}</p>}
+            {!demo&&<p><Link href={`/catalog/${encodeURIComponent(selected.courseCode)}`}>Leave a review for this course</Link></p>}
             <p className="coverage-note">Historical professor/course comparisons—not confirmed current sections. A higher score suggests easier reported outcomes, not a guaranteed A.</p>
             {personalized&&<div className="personal-ranking-note">Scores reflect your saved class preferences. <Link href="/account/setup">Edit preferences</Link>. A matching feature boosts a score when reviews support it; an unreported feature stays unknown.</div>}
             <div className="active-tags">{tags.map(t=><button key={t} onClick={()=>setTags(old=>old.filter(tag=>tag!==t))}>{TAG_LABELS[t]} ×</button>)}</div>
             <p className="comparison-count" role="status">{loading?'Loading professors…':error?'Comparison unavailable':`${visible.length} professor${visible.length===1?'':'s'}${tags.length?' matching your filters':''}`}</p>
             {error?<div className="empty-state" role="alert"><p>{error}</p><button className="load-more" onClick={()=>setRetry(n=>n+1)}>Try again</button></div>:<div className="offering-list">{!loading&&visible.map((o,i)=><OfferingCard key={o.id} offering={o} rank={i+1} preferences={personalized?preferences:null}/>)}
-              {!loading&&visible.length===0&&<div className="empty-state"><Search size={26}/><h3>No matching professors</h3><p>{tags.length?'Remove a filter to see more professors for this course.':'No imported professor reviews are available for this course yet.'}</p></div>}
+              {!loading&&visible.length===0&&<div className="empty-state"><Search size={26}/><h3>{tags.length?'No professors match these filters':'No reviews yet for this course'}</h3><p>{tags.length?'Remove a filter to see more professors for this course.':'Have you taken this class? Be the first to share your experience and help other students choose.'}</p>{!tags.length&&!demo&&<Link className="auth-button" href={`/catalog/${encodeURIComponent(selected.courseCode)}`}>Leave the first review</Link>}</div>}
             </div>}
           </div>
         </div>

@@ -9,7 +9,6 @@ export function SiteHeader() {
       <span className="wordmark">E<span>A</span>sy<span className="brand-period">.</span></span>
     </Link>
     <div className="header-actions">
-      <Link href="/catalog" className="catalog-nav">Course catalog</Link>
       <div className="school-pill"><span className="school-dot" /> University of Pittsburgh</div>
       <AccountNav />
     </div>

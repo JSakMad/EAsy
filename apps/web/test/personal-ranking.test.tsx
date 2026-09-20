@@ -50,3 +50,22 @@ describe('personalized course comparisons', () => {
     expect(screen.getByText(/Matches use online-class reports from EAsy students/)).toBeTruthy();
   });
 });
+
+describe('front-page course discovery',()=>{
+  it('finds courses by professor and distinguishes absent courses',()=>{
+    render(<BrowseExperience courses={[{...courses[0]!,courseTitle:'Computer Organization',professorNames:['Ada Example']}]} demo={false}/>);
+    const search=screen.getByRole('textbox',{name:'Search by course code, name, or professor'});
+    for(const value of ['cs0447','Computer Organization','Ada Example']) {
+      fireEvent.change(search,{target:{value}});
+      expect(screen.getByRole('button',{name:'Compare professors for CS 0447'})).toBeTruthy();
+    }
+    fireEvent.change(search,{target:{value:'NOTREAL999'}});
+    expect(screen.getByText('This course does not exist in our course data')).toBeTruthy();
+  });
+  it('invites a first review for an existing course without reviews',async()=>{
+    vi.stubGlobal('fetch',vi.fn().mockResolvedValue(Response.json({data:[]})));
+    render(<BrowseExperience courses={[{...courses[0]!,professorCount:0,reviewCount:0}]} demo={false} initialCode="CS0447"/>);
+    expect(await screen.findByText('No reviews yet for this course')).toBeTruthy();
+    expect(screen.getByRole('link',{name:'Leave the first review'}).getAttribute('href')).toBe('/catalog/CS%200447');
+  });
+});

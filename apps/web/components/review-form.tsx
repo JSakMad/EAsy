@@ -41,7 +41,7 @@ export function ReviewForm({ code, professors }: { code: string; professors: Pro
     </fieldset>
     <div><label htmlFor="review-comments">Comments about the class <span>(optional)</span></label>
       <textarea id="review-comments" name="comments" rows={5} maxLength={3000} value={comments} onChange={event=>setComments(event.target.value)} placeholder="What should another student know about this class?" aria-describedby="comments-hint" />
-      <p id="comments-hint">Up to 3,000 characters. Your review is public; your name and email are not displayed. Focus on your class experience.</p>
+      <p id="comments-hint">Up to 3,000 characters. Your feedback contributes to scores and AI overviews; individual reviews are not displayed. Focus on your class experience.</p>
     </div>
     <p>The submission date is recorded automatically. One review per professor and course.</p>
     {state.error && <p role="alert" className="auth-error">{state.error}</p>}
