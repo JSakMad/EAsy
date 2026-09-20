@@ -2,12 +2,12 @@
 
 import {useEffect,useMemo,useRef,useState} from 'react';
 import Link from 'next/link';
-import {ArrowLeft,ArrowRight,ArrowUpRight,Search,SlidersHorizontal,Users} from 'lucide-react';
+import {ArrowLeft,ArrowRight,ArrowUpRight,Search,SlidersHorizontal} from 'lucide-react';
 import {TAG_LABELS,TAG_GROUPS,normalizeCourseCode,type TagType} from '@easy-a/core';
 import type {Course,Offering} from '@/lib/types';
 import {demoOfferings} from '@/lib/demo-data';
 import {SiteHeader} from './site-header';
-import {SubjectIcon} from './subject-icon';
+import {CourseNotebook} from './course-notebook';
 import {calculatePersonalScore, type ClassPreference} from '@easy-a/core';
 import {PersonalScoreNote} from './personal-score-note';
 
@@ -18,8 +18,7 @@ export function BrowseExperience({courses,demo,initialCode,preferences=null}:{co
   const personalized=preferences!==null&&!demo;
   const [selected,setSelected]=useState<Course|null>(()=>courses.find(c=>c.courseCode===normalizeCourseCode(initialCode??'',{})||compact(c.courseCode)===compact(initialCode??''))??null);
   const [query,setQuery]=useState('');
-  const [subject,setSubject]=useState('all');
-  const [limit,setLimit]=useState(24);
+  const [page,setPage]=useState(0);
   const [offerings,setOfferings]=useState<Offering[]>([]);
   const [tags,setTags]=useState<TagType[]>([]);
   const [sort,setSort]=useState<SortKey>('score');
@@ -28,10 +27,9 @@ export function BrowseExperience({courses,demo,initialCode,preferences=null}:{co
   const [retry,setRetry]=useState(0);
   const resultsHeading=useRef<HTMLHeadingElement>(null);
   const searchInput=useRef<HTMLInputElement>(null);
-  const subjects=useMemo(()=>[...new Set(courses.map(c=>c.courseCode.split(' ')[0]))].sort(),[courses]);
-  const matches=useMemo(()=>courses.filter(c=>(subject==='all'||c.courseCode.split(' ')[0]===subject)&&
+  const matches=useMemo(()=>courses.filter(c=>
     (!query.trim()||compact(c.courseCode).includes(compact(query))||c.courseCode===normalizeCourseCode(query,{})||[c.courseTitle,...(c.professorNames??[]),...(c.fieldsOfStudy??[]),...(c.alternateTitles??[])].filter(Boolean).join(' ').toLowerCase().includes(query.trim().toLowerCase())))
-    .sort((a,b)=>b.reviewCount-a.reviewCount||a.courseCode.localeCompare(b.courseCode)),[courses,query,subject]);
+    .sort((a,b)=>b.reviewCount-a.reviewCount||a.courseCode.localeCompare(b.courseCode)),[courses,query]);
 
   useEffect(()=>{
     if(!selected) return;
@@ -96,18 +94,11 @@ export function BrowseExperience({courses,demo,initialCode,preferences=null}:{co
       {demo&&<div className="demo-banner"><span>DEMO DATA</span> The API is unavailable. These fictional examples are not real professor recommendations.</div>}
       {!selected?<>
         <div className="finder-toolbar course-toolbar">
-          <label className="course-search"><span>Search the index</span><div><Search size={21}/><input ref={searchInput} value={query} onChange={e=>{setQuery(e.target.value);setLimit(24);}} placeholder="Course code, course name, or professor" aria-label="Search by course code, name, or professor"/></div></label>
-          <label className="subject-picker"><span>Subject</span><select value={subject} onChange={e=>{setSubject(e.target.value);setLimit(24);}}><option value="all">All subjects</option>{subjects.map(s=><option key={s}>{s}</option>)}</select></label>
+          <label className="course-search"><span>Search the index</span><div><Search size={21}/><input ref={searchInput} value={query} onChange={e=>{setQuery(e.target.value);setPage(0);}} placeholder="Course code, course name, or professor" aria-label="Search by course code, name, or professor"/></div></label>
         </div>
         <div className="catalog-heading"><div><p className="section-kicker">The course index</p><h2>What’s on your schedule?</h2></div><span aria-live="polite">{matches.length} courses</span></div>
         <p className="coverage-note">Search all supplied courses by code, name, professor, or field of study. Most-reviewed courses appear first.</p>
-        <div className="course-grid">{matches.slice(0,limit).map(course=><button key={course.courseCode} className="course-card" onClick={()=>choose(course)} aria-label={`Compare professors for ${course.courseCode}`}>
-          <div className="course-card-top"><SubjectIcon courseCode={course.courseCode}/><ArrowUpRight size={19}/></div>
-          <h3>{course.courseCode}</h3><p>{course.courseTitle||'Pitt course · student-reported data'}</p>
-          <div className="course-card-bottom"><span><Users size={14}/>{course.professorCount} professor{course.professorCount===1?'':'s'}</span><span>{course.reviewCount} reviews</span></div>
-        </button>)}</div>
-        {matches.length>limit&&<button className="load-more" onClick={()=>setLimit(n=>n+24)}>Show more courses <ArrowRight size={16}/></button>}
-        {matches.length===0&&<div className="empty-state"><Search size={28}/><h3>This course does not exist in our course data</h3><p>Check the course code, name, or professor, or choose All subjects.</p></div>}
+        <CourseNotebook courses={matches} page={page} onPageChange={setPage} onChoose={choose}/>
       </>:<>
         <div className="comparison-top"><button onClick={back} className="back-button"><ArrowLeft size={16}/> All courses</button><span>Same course. Different professors.</span></div>
         <div className="content-grid comparison-grid">

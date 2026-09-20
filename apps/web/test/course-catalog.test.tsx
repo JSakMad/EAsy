@@ -20,20 +20,34 @@ describe('course catalog ordering',()=>{
     expect(cardNames()).toEqual(['MATH 0230','CS 1530','MATH 0220','ENGCMP 0200']);
     expect(JSON.stringify(courses)).toBe(original);
   });
-  it('keeps review ordering when searching or filtering by subject',()=>{
+  it('keeps review ordering when searching and removes the subject dropdown',()=>{
     render(<BrowseExperience courses={courses} demo={false}/>);
     fireEvent.change(screen.getByRole('textbox',{name:'Search by course code, name, or professor'}),{target:{value:'MATH'}});
     expect(cardNames()).toEqual(['MATH 0230','MATH 0220']);
-    fireEvent.change(screen.getByRole('textbox',{name:'Search by course code, name, or professor'}),{target:{value:''}});
-    fireEvent.change(screen.getByRole('combobox'),{target:{value:'MATH'}});
-    expect(cardNames()).toEqual(['MATH 0230','MATH 0220']);
+    expect(screen.queryByRole('combobox')).toBeNull();
   });
-  it('sorts before limiting the initial 24 cards and preserves order on show more',()=>{
-    const many=Array.from({length:30},(_,i)=>({courseCode:`MATH ${String(i).padStart(4,'0')}`,courseTitle:null,reviewCount:i,professorCount:1}));
+  it('turns through four courses per page, handles the last page, and resets on search',()=>{
+    const many=Array.from({length:10},(_,i)=>({courseCode:`MATH ${String(i).padStart(4,'0')}`,courseTitle:null,reviewCount:i,professorCount:1}));
     render(<BrowseExperience courses={many} demo/>);
-    expect(cardNames()).toHaveLength(24);expect(cardNames()[0]).toBe('MATH 0029');
-    fireEvent.click(screen.getByRole('button',{name:/Show more courses/}));
-    expect(cardNames()).toHaveLength(30);expect(cardNames().at(-1)).toBe('MATH 0000');
+    const next=screen.getByRole('button',{name:'Next notebook page'});
+    const back=screen.getByRole('button',{name:'Previous notebook page'});
+    expect(cardNames()).toEqual(['MATH 0009','MATH 0008','MATH 0007','MATH 0006']);
+    expect(back).toHaveProperty('disabled',true);
+    fireEvent.click(next);
+    expect(cardNames()).toEqual(['MATH 0005','MATH 0004','MATH 0003','MATH 0002']);
+    fireEvent.click(next);
+    expect(cardNames()).toEqual(['MATH 0001','MATH 0000']);
+    expect(next).toHaveProperty('disabled',true);
+    fireEvent.click(back);
+    expect(cardNames()[0]).toBe('MATH 0005');
+    fireEvent.change(screen.getByRole('textbox',{name:'Search by course code, name, or professor'}),{target:{value:'0009'}});
+    expect(cardNames()).toEqual(['MATH 0009']);
+    expect(screen.getByText(/Page 1 of 1/)).toBeTruthy();
+    fireEvent.change(screen.getByRole('textbox',{name:'Search by course code, name, or professor'}),{target:{value:'does not exist'}});
+    expect(screen.queryAllByRole('button',{name:/Compare professors for/})).toHaveLength(0);
+    expect(screen.getByText('This course does not exist in our course data')).toBeTruthy();
+    expect(next).toHaveProperty('disabled',true);
+    expect(back).toHaveProperty('disabled',true);
   });
 });
 describe('subject icons',()=>{
