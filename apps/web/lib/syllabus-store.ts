@@ -1,5 +1,6 @@
 import 'server-only';
 import type { ClassPreference, TagType } from '@easy-a/core';
+import { SYLLABUS_CHECKER_VERSION } from './syllabus-ai';
 import { webDatabase } from './web-database';
 import { SyllabusError, type SyllabusResult } from './syllabus-check';
 
@@ -28,9 +29,9 @@ export async function reserveSyllabusAttempt(userId: string) {
 }
 
 export async function saveSyllabusCheck(reviewId: string, hash: string, result: SyllabusResult) {
-  await webDatabase().query(`INSERT INTO syllabus_verifications(review_id,document_hash,preferences,tags)
-    VALUES($1,$2,$3,$4) ON CONFLICT(review_id) DO UPDATE SET document_hash=EXCLUDED.document_hash,
-    preferences=EXCLUDED.preferences,tags=EXCLUDED.tags,checked_at=now(),checker_version=1`, [reviewId, hash, result.preferences, result.tags]);
+  await webDatabase().query(`INSERT INTO syllabus_verifications(review_id,document_hash,preferences,tags,checker_version)
+    VALUES($1,$2,$3,$4,$5) ON CONFLICT(review_id) DO UPDATE SET document_hash=EXCLUDED.document_hash,
+    preferences=EXCLUDED.preferences,tags=EXCLUDED.tags,checked_at=now(),checker_version=EXCLUDED.checker_version`, [reviewId, hash, result.preferences, result.tags, SYLLABUS_CHECKER_VERSION]);
 }
 
 export type SyllabusSupport = { tags: TagType[]; preferences: ClassPreference[]; checkedAt: string | null; available: boolean };
@@ -40,8 +41,8 @@ export async function getSyllabusSupport(offeringId: string): Promise<SyllabusSu
   try {
     const { rows } = await webDatabase().query<{ tags: TagType[]; preferences: ClassPreference[]; checkedAt: Date }>(
       `SELECT v.tags,v.preferences,v.checked_at AS "checkedAt" FROM syllabus_verifications v
-       JOIN student_reviews r ON r.id=v.review_id WHERE r.offering_id=$1 AND v.checker_version=1
-       AND cardinality(v.preferences)>0 AND v.preferences <@ r.tags AND v.checked_at>now()-interval '180 days' ORDER BY v.checked_at DESC`, [offeringId]);
+       JOIN student_reviews r ON r.id=v.review_id WHERE r.offering_id=$1 AND v.checker_version=$2
+       AND cardinality(v.preferences)>0 AND v.preferences <@ r.tags AND v.checked_at>now()-interval '180 days' ORDER BY v.checked_at DESC`, [offeringId, SYLLABUS_CHECKER_VERSION]);
     return { tags: [...new Set(rows.flatMap(row=>row.tags))], preferences: [...new Set(rows.flatMap(row=>row.preferences))], checkedAt: rows[0]?.checkedAt.toISOString() ?? null, available: true };
   } catch { return { ...empty, available: false }; }
 }

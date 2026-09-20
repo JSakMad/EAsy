@@ -1,0 +1,1 @@
+Legacy Word extraction test fixture from https://github.com/morungos/node-word-extractor/blob/develop/__tests__/data/test01.doc, distributed under the included MIT license. Used only for parser tests; never sent to the AI provider.

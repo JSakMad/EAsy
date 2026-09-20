@@ -1,15 +1,18 @@
 import 'server-only';
+import { extractWord } from './syllabus-word';
 import { getDocumentProxy } from 'unpdf';
 import { SyllabusError, SYLLABUS_MAX_BYTES } from './syllabus-check';
 
 export async function extractSyllabus(file: File) {
-  if (!file.size || file.size > SYLLABUS_MAX_BYTES) throw new SyllabusError('Choose a PDF or text file smaller than 2 MB.');
+  if (!file.size || file.size > SYLLABUS_MAX_BYTES) throw new SyllabusError('Choose a PDF, Word, or text file smaller than 2 MB.');
   const bytes = new Uint8Array(await file.arrayBuffer());
   let text = '';
   if (/\.txt$/i.test(file.name) && (!file.type || file.type === 'text/plain')) {
     try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
     catch { throw new SyllabusError('This text file could not be read. Upload a UTF-8 text file or a text-based PDF.'); }
     if (text.includes('\0')) throw new SyllabusError('Upload a readable text file or PDF.');
+  } else if (/\.docx?$/i.test(file.name) && (!file.type || ['application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/octet-stream'].includes(file.type))) {
+    text = await extractWord(bytes, /\.docx$/i.test(file.name));
   } else if (/\.pdf$/i.test(file.name) && (!file.type || file.type === 'application/pdf') && new TextDecoder().decode(bytes.slice(0, 5)) === '%PDF-') {
     let pdf: Awaited<ReturnType<typeof getDocumentProxy>> | undefined;
     try {
@@ -26,8 +29,8 @@ export async function extractSyllabus(file: File) {
       if (error instanceof SyllabusError) throw error;
       throw new SyllabusError('This PDF could not be read. Try an unlocked, text-based PDF or a text file.');
     } finally { await pdf?.loadingTask.destroy(); }
-  } else throw new SyllabusError('Upload a PDF or .txt syllabus. Other file types are not supported yet.');
-  if (text.trim().length < 80) throw new SyllabusError('We could not find enough readable text. Scanned images are not supported; upload a text-based PDF or .txt syllabus.');
+  } else throw new SyllabusError('Upload a PDF, Word (.doc or .docx), or .txt syllabus.');
+  if (text.trim().length < 80) throw new SyllabusError('We could not find enough readable text. Scanned images are not supported; upload a text-based PDF, Word document, or .txt syllabus.');
   if (text.length > 100_000) throw new SyllabusError('This syllabus contains too much text. Upload a shorter document.');
   return { text, bytes };
 }

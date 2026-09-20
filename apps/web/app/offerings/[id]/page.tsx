@@ -48,11 +48,11 @@ export default async function OfferingPage({ params }: { params: Promise<{ id: s
         {Boolean(offering.studentReviewCount) && <p>This score combines {offering.studentReviewCount} EAsy student reviews and {offering.importedReviewCount ?? 0} imported reviews. AI overviews summarize student feedback.</p>}
       </div>}
       {!demo && <section className="syllabus-panel" aria-labelledby="syllabus-title"><p className="section-kicker">Check the class details</p><h2 id="syllabus-title">What does the syllabus say?</h2>
-        <p>After leaving your review, upload a syllabus for this exact course and professor. We check explicit class policies against the tags you selected.</p>
+        <p>After leaving your review, upload a syllabus for this exact course and professor. Groq AI compares the document?s course and instructor details, then checks its policies against the tags you selected.</p>
         <p className="syllabus-legend"><SyllabusMark/> Syllabus-supported: a matching uploaded document supports this tag. This does not authenticate the document or verify grades and difficulty. Policies can change between semesters; checks expire after 180 days.</p>
         {support.checkedAt && <p className="coverage-note">Last supporting upload checked {new Date(support.checkedAt).toISOString().slice(0,10)} (UTC).</p>}
         {!support.available ? <p role="status">Syllabus checking is temporarily unavailable.</p> : profile ? <SyllabusUpload offeringId={id}/> : <Link className="auth-back" href="/sign-in">Sign in to upload a syllabus</Link>}
-        <p className="coverage-note">The document is processed privately and discarded. Only its fingerprint, check results, and check date are saved.</p>
+        <p className="coverage-note">Extracted syllabus text and the course/professor details are sent to Groq for analysis; contact details are redacted where recognized. We discard the uploaded file and extracted text after processing. Only its fingerprint, check results, and check date are saved.</p>
       </section>}
       <AiOverview data={overview} demo={demo} offeringId={id}/>
       <div className="breakdown-panel"><div className="panel-heading"><div><p>Why this score</p><h2>The full breakdown</h2></div><BarChart3 size={24} /></div>

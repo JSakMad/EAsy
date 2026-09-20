@@ -66,3 +66,5 @@ Share these with teammates after launch:
 - This guide and the requirement to work on branches and submit pull requests.
 
 Keep raw reviews and exports out of the repository. Public aggregate API access is not a public database login or permission to redistribute source reviews. Disclose the dataset's actual provenance and pre-existing project work in a hackathon submission; removing collection code does not change either.
+
+Syllabus AI runs in the Next.js server: set the same server-only `GROQ_API_KEY` in `apps/web/.env.local` and the Vercel project environment. See [syllabus verification](docs/SYLLABUS_VERIFICATION.md) for Word/PDF support and deployment details.
